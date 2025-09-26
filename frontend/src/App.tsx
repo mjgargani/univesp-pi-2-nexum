@@ -1,16 +1,18 @@
 import { useTitle } from './hooks/useTitle';
-
 import { HashRouter } from 'react-router-dom';
-import './App.css';
+
 import Container from './components/templates/Container';
+
+import './App.css';
 
 
 function App() {
-  useTitle('Nexum: Mecânica SHALLON');
+  const title = import.meta.env.VITE_COMPANY_NAME ? `Nexum: ${import.meta.env.VITE_COMPANY_NAME}` : 'Nexum: Mecânica SHALLON';
+  useTitle(title);
   return (
     <HashRouter>
-      <div className="min-h-screen bg-gray-50">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="">
+        <main className="">
           <Container landing={location.hash === '#/' || location.hash === ''} />
         </main>
       </div>

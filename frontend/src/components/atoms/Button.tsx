@@ -32,6 +32,7 @@ export const Button: React.FC<ButtonProps> = ({
         px-4 py-2
         border-none
         font-medium
+        cursor-pointer
         ${statusStyles[status]}
         ${className}
       `}
