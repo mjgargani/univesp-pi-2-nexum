@@ -1,3 +1,6 @@
+// "DTO" - Data Transfer Objects para criação e atualização de serviços
+// Define a estrutura dos dados esperados ao criar ou atualizar um serviço
+
 export class CreateServiceDto {
   customerId: string;
   title: string;
