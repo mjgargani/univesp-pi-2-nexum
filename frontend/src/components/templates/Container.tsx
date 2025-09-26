@@ -10,7 +10,7 @@ import Logo from "../atoms/Logo";
 
 export default function Container({ landing = true, manage = false }: { landing?: boolean, manage?: boolean }) {
 	return (<div className="flex flex-col">
-    <header className="flex justify-center bg-[#40576e] p-[8px] rounded-b-[16px] mb-[16px]">
+    <header className="flex justify-center bg-[#40576e] p-[8px] rounded-b-[16px]">
       <div className="flex flex-row flex-grow max-w-[800px]">
         <Logo className="max-w-[150px]"/>
         <nav className="flex flex-row gap-x-[8px] flex-grow justify-between ml-[32px] max-h-[32px] mt-[16px]">

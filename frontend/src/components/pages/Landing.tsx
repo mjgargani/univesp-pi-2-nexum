@@ -22,25 +22,26 @@ const services = [
 
 export default function Landing() {
 	return (
-		<div className="min-h-screen bg-[#232a31]">
-			
-			<main className="flex flex-row gap-8 justify-center mt-10 px-8">
+		<div className="min-h-screen m-[16px]">
+			<div className="flex flex-row gap-[16px] justify-center">
 				{services.map((service, idx) => (
-					<div
-						key={idx}
-						className="bg-[#2d343b] rounded-2xl shadow-lg p-6 max-w-xs flex flex-col items-center"
-					>
-						<img
-							src={service.image}
-							alt={service.title}
-							className="rounded-xl mb-4 w-full h-44 object-cover"
-							draggable={false}
-						/>
-						<h2 className="text-lg font-bold text-white mb-2 text-left w-full">{service.title}</h2>
-						<p className="text-gray-200 text-sm text-left w-full">{service.description}</p>
-					</div>
+								<div
+									key={idx}
+									className="flex-1 bg-[#2d343b] rounded-[16px] flex flex-col justify-start"
+								>
+									<img
+										src={service.image}
+										alt={service.title}
+										className="rounded-t-[16px] w-full h-[200px] object-cover"
+										draggable={false}
+									/>
+									<div className="p-[8px] flex flex-col flex-grow justify-start">
+										<h3 className="text-white mb-2 text-left w-full">{service.title}</h3>
+										<p className="text-xs text-left w-full">{service.description}</p>
+									</div>
+								</div>
 				))}
-			</main>
+			</div>
 		</div>
 	);
 }
