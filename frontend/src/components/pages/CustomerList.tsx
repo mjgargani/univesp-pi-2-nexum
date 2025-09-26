@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Customer, CreateCustomerDto } from '../types';
-import { CustomerService } from '../services/customers';
+import type { Customer, CreateCustomerDto } from '../../types';
+import { CustomerService } from '../../services/customers';
 
 export default function CustomerList() {
   const [customers, setCustomers] = useState<Customer[]>([]);

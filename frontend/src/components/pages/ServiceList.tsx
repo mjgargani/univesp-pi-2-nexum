@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { MechanicalService, Customer, CreateServiceDto } from '../types';
-import { MechanicalServiceService } from '../services/mechanicalServices';
-import { CustomerService } from '../services/customers';
+import type { MechanicalService, Customer, CreateServiceDto } from '../../types';
+import { MechanicalServiceService } from '../../services/mechanicalServices';
+import { CustomerService } from '../../services/customers';
 
 export default function ServiceList() {
   const [services, setServices] = useState<MechanicalService[]>([]);
@@ -209,7 +209,7 @@ export default function ServiceList() {
                   id="priority"
                   required
                   value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value as MechanicalService['priority'] })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="low">Low</option>
@@ -308,7 +308,7 @@ export default function ServiceList() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select
                     value={service.status}
-                    onChange={(e) => handleStatusUpdate(service.id, e.target.value as any)}
+                    onChange={(e) => handleStatusUpdate(service.id, e.target.value as MechanicalService['status'])}
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(service.status)} border-0 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   >
                     <option value="pending">Pending</option>

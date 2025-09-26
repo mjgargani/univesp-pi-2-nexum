@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -23,6 +23,8 @@ services:
       - "80:80"
     depends_on:
       - backend
+    environment:
+      - COMPANY_NAME=Mecânica SHALLON
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
