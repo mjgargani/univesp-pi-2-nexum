@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersService } from '../customers/customers.service';
-import { Customer } from '../customers/customer.interface';
+import { CreateCustomerDto } from 'src/customers/customer.dto';
 
 describe('CustomersService', () => {
   let service: CustomersService;
@@ -30,7 +30,7 @@ describe('CustomersService', () => {
   });
 
   it('should create a new customer', () => {
-    const newCustomer = {
+    const newCustomer: CreateCustomerDto = {
       name: 'Test Customer',
       email: 'test@example.com',
       phone: '(11) 12345-6789',

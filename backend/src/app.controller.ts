@@ -10,6 +10,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
+
+  // endpoint de verificação de saúde da API
   @Get('health')
   getHealth() {
     return { status: 'OK', service: 'Nexum API', timestamp: new Date().toISOString() };
