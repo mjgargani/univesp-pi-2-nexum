@@ -1,3 +1,4 @@
+import { useTitle } from './hooks/useTitle';
 
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import Landing from './components/pages/Landing';
@@ -8,6 +9,7 @@ import './App.css';
 
 
 function App() {
+  useTitle('Nexum: Mecânica SHALLON');
   return (
     <HashRouter>
       <div className="min-h-screen bg-gray-50">
