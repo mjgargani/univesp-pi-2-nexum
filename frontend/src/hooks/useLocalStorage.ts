@@ -1,5 +1,5 @@
-import { read } from 'fs';
-import { useEffect, useMemo,  useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getKeyValue, setKeyValue } from '../helpers/keyValue';
 
 type Dict = Record<string, string>;
 
@@ -18,7 +18,7 @@ export function useLocalStorage() {
   const isBrowser = typeof window !== 'undefined';
   const [state, setState] = useState<Dict>(() => readSnapshot());
 
-  userEffect(() => {
+  useEffect(() => {
     if (!isBrowser) return;
     const onStorage = (e: StorageEvent) => {
       if (e.storageArea === window.localStorage) setState(readSnapshot());
@@ -28,8 +28,14 @@ export function useLocalStorage() {
 
   const setItem = (key:string, value: string) => {
     if (!isBrowser) return;
-    window.localStorage.setItem(key, value);
+    const newValue = setKeyValue(key, value);
+    window.localStorage.setItem(key, newValue[key]);
     setState(readSnapshot());
+  }
+
+  const getItem = (key: string, defaultValue: string | null = null) => {
+    if (key in state) return getKeyValue(key, state, defaultValue);
+    return defaultValue;
   }
 
   const clear = () => {
@@ -37,4 +43,6 @@ export function useLocalStorage() {
     window.localStorage.clear();
     setState(readSnapshot());
   }
+
+  return {setItem, getItem, clear} as const
 }
