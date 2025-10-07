@@ -5,19 +5,12 @@ interface LogoProps {
   style?: React.CSSProperties;
 }
 
+const companyName = import.meta.env.VITE_COMPANY_NAME || 'Nexum';
 
-import logo from '../../assets/logo.svg';
-
-
-const companyName = import.meta.env.VITE_COMPANY_NAME || 'Mecânica SHALLON';
-
-const Logo: React.FC<LogoProps> = ({ className = '', style }) => (
-  <img
-    src={logo}
-    alt={`Logo ${companyName}`}
-    className={className}
-    style={style}
-    draggable={false}
+const Logo: React.FC<LogoProps> = ({ className = '' }) => (
+  <div 
+    className={`flex-1 bg-[url('/logo.svg')] bg-no-repeat bg-contain bg-center h-[100px] ${className}`} 
+    aria-label={`Logo ${companyName}`}
   />
 );
 

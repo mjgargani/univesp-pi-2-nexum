@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-.dark {
-  @theme {
-    --bg: var(--color-blue-500);
-    --fg: var(--color-blue-700);
-    --brand: var(--color-blue-950);
-    --text: var(--color-white);
-  }
+:root {
+  color-scheme: dark light;
 }
 
-@custom-variant light (&:where(.light, .light *));
+@custom-variant light (:where(.light, .light *) &);
+
+:root {
+  --bg: #000;
+  --fg: #3a4f63;
+  --brand: #243545;
+  --highlight: #517494;
+  --text: #fff;
+}
 
 .light {
-  @theme {
-    --bg: var(--color-cyan-500);
-    --fg: var(--color-cyan-700);
-    --brand: var(--color-cyan-950);
-    --text: var(--color-black);
-  }
+  --bg: #fff;
+  --fg: #6588a9;
+  --brand: #557898;
+  --highlight: #74a2ce;
+  --text: #000;
 }

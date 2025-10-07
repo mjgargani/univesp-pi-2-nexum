@@ -17,31 +17,28 @@ const services = [
 		description:
 			'Itens essenciais como pneus, freios e baterias impactam diretamente sua segurança e a do veículo. Trabalhamos com marcas de qualidade e revisões detalhadas, garantindo que cada componente esteja no seu melhor estado. As revisões preventivas ajudam a evitar imprevistos, aumentando a vida útil do carro e reduzindo custos futuros.',
 		image: 'https://blog.imdepa.com.br/wp-content/uploads/2022/12/autopecas-variadas.jpg',
-	},
+	}
 ];
 
 export default function Landing() {
 	return (
-		<div className="min-h-screen m-[16px]">
-			<div className="flex flex-row gap-[16px] justify-center">
-				{services.map((service, idx) => (
-								<div
-									key={idx}
-									className="flex-1 bg-[var(--fg)] rounded-[16px] flex flex-col justify-start"
-								>
-									<img
-										src={service.image}
-										alt={service.title}
-										className="rounded-t-[16px] w-full h-[200px] object-cover"
-										draggable={false}
-									/>
-									<div className="p-[8px] flex flex-col flex-grow justify-start">
-										<h3 className="text-[var(--text)] mb-2 text-left w-full">{service.title}</h3>
-										<p className="text-[var(--text)] text-xs text-left w-full">{service.description}</p>
-									</div>
-								</div>
-				))}
-			</div>
-		</div>
+    <div className="flex flex-wrap justify-center gap-4 w-full">
+      {services.map((service, idx) => (
+        <div
+          key={idx}
+          className="flex flex-col flex-grow bg-[var(--fg)] rounded-lg overflow-hidden w-full sm:w-1/2 lg:w-1/4"
+        >
+          <div 
+            className={`h-48 bg-no-repeat bg-cover bg-center m-4 rounded-lg`}
+            style={{ backgroundImage: `url(${service.image})` }} 
+            aria-label={`Imagem: ${service.title}`}
+          />
+          <div className="flex flex-col flex-1 justify-between p-4">
+            <h3 className="text-[var(--text)] mb-2 text-left w-full font-semibold">{service.title}</h3>
+            <p className="text-[var(--text)] text-sm leading-relaxed">{service.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
 	);
 }
