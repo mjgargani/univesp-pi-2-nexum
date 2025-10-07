@@ -56,3 +56,5 @@ export interface UpdateServiceDto {
   scheduledDate?: string;
   completedDate?: string;
 }
+
+export type Theme = 'light' | 'dark';

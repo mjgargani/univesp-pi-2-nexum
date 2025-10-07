@@ -1,3 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark light;
+}
+
+@custom-variant light (:where(.light, .light *) &);
+
+:root {
+  --bg: #000;
+  --fg: #3a4f63;
+  --brand: #243545;
+  --highlight: #517494;
+  --text: #fff;
+}
+
+.light {
+  --bg: #fff;
+  --fg: #6588a9;
+  --brand: #557898;
+  --highlight: #74a2ce;
+  --text: #000;
+}
