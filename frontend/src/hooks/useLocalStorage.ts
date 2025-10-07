@@ -1,15 +1,40 @@
-import { useEffect, useState } from 'react';
+import { read } from 'fs';
+import { useEffect, useMemo,  useState } from 'react';
+
+type Dict = Record<string, string>;
+
+const readSnapshot = (): Dict => {
+  if (typeof window === 'undefined') return {};
+  const ls = window.localStorage;
+  const out: Dict = {};
+  for (let i=0; i< ls.length; i++) {
+    const k = ls.key(i)!;
+    out[k] = ls.getItem(k) ?? '';
+  }
+  return out;
+}
 
 export function useLocalStorage() {
-  const [localStorage, setLocalStorage] = useState<{key: string, value: string}[]>([]);
+  const isBrowser = typeof window !== 'undefined';
+  const [state, setState] = useState<Dict>(() => readSnapshot());
 
-  useEffect(() => {
-    const storedData = Object.keys(window.localStorage).map(key => ({
-      key,
-      value: window.localStorage.getItem(key) || ''
-    }));
-    setLocalStorage(storedData);
-  }, []);
+  userEffect(() => {
+    if (!isBrowser) return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.storageArea === window.localStorage) setState(readSnapshot());
+    }
+    return () => window.removeEventListener('storage', onStorage);
+  }, [isBrowser]);
 
-  return [localStorage, setLocalStorage] as const;
+  const setItem = (key:string, value: string) => {
+    if (!isBrowser) return;
+    window.localStorage.setItem(key, value);
+    setState(readSnapshot());
+  }
+
+  const clear = () => {
+    if (!isBrowser) return;
+    window.localStorage.clear();
+    setState(readSnapshot());
+  }
 }
