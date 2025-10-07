@@ -27,7 +27,7 @@ export default function Landing() {
 				{services.map((service, idx) => (
 								<div
 									key={idx}
-									className="flex-1 bg-[#2d343b] rounded-[16px] flex flex-col justify-start"
+									className="flex-1 bg-[var(--fg)] rounded-[16px] flex flex-col justify-start"
 								>
 									<img
 										src={service.image}
@@ -36,8 +36,8 @@ export default function Landing() {
 										draggable={false}
 									/>
 									<div className="p-[8px] flex flex-col flex-grow justify-start">
-										<h3 className="text-white mb-2 text-left w-full">{service.title}</h3>
-										<p className="text-xs text-left w-full">{service.description}</p>
+										<h3 className="text-[var(--text)] mb-2 text-left w-full">{service.title}</h3>
+										<p className="text-[var(--text)] text-xs text-left w-full">{service.description}</p>
 									</div>
 								</div>
 				))}

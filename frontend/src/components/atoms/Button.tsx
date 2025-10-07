@@ -9,9 +9,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const statusStyles: Record<ButtonStatus, string> = {
-  default: "bg-[#344c63] text-white",
-  options: "bg-[#406181] text-white",
-  disabled: "bg-[#344c63] text-white opacity-50 cursor-not-allowed",
+  default: "bg-[var(--brand)] text-[var(--text)]",
+  options: "bg-[var(--brand)] text-[var(--text)]",
+  disabled: "bg-[var(--brand)] text-[var(--text)] opacity-50 cursor-not-allowed",
 };
 
 export const Button: React.FC<ButtonProps> = ({

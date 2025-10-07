@@ -10,17 +10,17 @@ import Logo from "../atoms/Logo";
 
 export default function Container({ landing = true, manage = false }: { landing?: boolean, manage?: boolean }) {
 	return (<div className="flex flex-col">
-    <header className="flex justify-center bg-[#40576e] p-[8px] rounded-b-[16px]">
-      <div className="flex flex-row flex-grow max-w-[800px]">
-        <Logo className="max-w-[150px]"/>
-        <nav className="flex flex-row gap-x-[8px] flex-grow justify-between ml-[32px] max-h-[32px] mt-[16px]">
+    <header className="flex justify-center p-8 rounded-b-lg bg-[var(--fg)] text-[var(--fg)]">
+      <div className="flex flex-row flex-grow max-w-6xl gap-8 items-center">
+        <Logo className="max-w-1/5"/>
+        <nav className="flex flex-row flex-grow justify-between items-center">
         {landing ? (
           <>
-            <Button status="options" className="bg-[#5c7ca6] text-white font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[#6e8bb7]" aria-label="Ver Página Inicial">HOME</Button>
-            <Button status="options" className="bg-[#5c7ca6] text-white font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[#6e8bb7]" aria-label="Ver Página 'Quem Somos'">QUEM SOMOS</Button>
-            <Button status="options" className="bg-[#5c7ca6] text-white font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[#6e8bb7]" aria-label="Ver Página 'Serviços'">SERVIÇOS</Button>
-            <Button status="options" className="bg-[#5c7ca6] text-white font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[#6e8bb7]" aria-label="Ver Página 'Contato'">CONTATO</Button>
-            <Button status="options" className="bg-[#5c7ca6] text-white font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[#6e8bb7]">{manage ? 'GERENCIAR' : 'LOGIN'}</Button>
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--brand]" aria-label="Ver Página Inicial">HOME</Button>
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--brand]" aria-label="Ver Página 'Quem Somos'">QUEM SOMOS</Button>
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--brand]" aria-label="Ver Página 'Serviços'">SERVIÇOS</Button>
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--brand]" aria-label="Ver Página 'Contato'">CONTATO</Button>
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--brand]">{manage ? 'GERENCIAR' : 'LOGIN'}</Button>
           </>
         ) : (
           <>

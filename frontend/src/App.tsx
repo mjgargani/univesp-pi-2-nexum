@@ -9,9 +9,12 @@ import './App.css';
 function App() {
   const title = import.meta.env.VITE_COMPANY_NAME ? `Nexum: ${import.meta.env.VITE_COMPANY_NAME}` : 'Nexum: Mecânica SHALLON';
   useTitle(title);
+
+
+  
   return (
     <HashRouter>
-      <div className="">
+      <div className="dark:bg-[var(--bg)]">
         <main className="">
           <Container landing={location.hash === '#/' || location.hash === ''} />
         </main>

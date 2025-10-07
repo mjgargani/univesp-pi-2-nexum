@@ -1,3 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  @theme {
+    --bg: var(--color-blue-500);
+    --fg: var(--color-blue-700);
+    --brand: var(--color-blue-950);
+    --text: var(--color-white);
+  }
+}
+
+@custom-variant light (&:where(.light, .light *));
+
+.light {
+  @theme {
+    --bg: var(--color-cyan-500);
+    --fg: var(--color-cyan-700);
+    --brand: var(--color-cyan-950);
+    --text: var(--color-black);
+  }
+}
