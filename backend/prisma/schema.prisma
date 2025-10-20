@@ -1,0 +1,350 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Based on the file: ../../new_erd.yml
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at") // Mapeia o campo createdAt para a coluna created_at
+  updatedAt   DateTime  @updatedAt @map("updated_at") // @updatedAt é a convenção do Prisma
+  user        String    @unique
+  password    String
+  document    String    @unique
+  firstName   String    @map("first_name") // Mapeia o campo firstName para a coluna first_name
+  middleName  String?   @map("middle_name") // Mapeia o campo middleName para a coluna middle_name
+  lastName    String    @map("last_name") // Mapeia o campo lastName para a coluna last_name
+  birthDate   DateTime? @map("birth_date") // Mapeia o campo birthDate para a coluna birth_date
+  complement  String?
+
+  orders      Order[]   // Relação 1:N com Order
+
+  contacts    UserContact[] // Relação 1:N com UserContact
+
+  addresses   UserAddress[] // Relação 1:N com UserAddress
+
+  @@map("users") // Mapeia este modelo para a tabela 'users'
+}
+
+model Supplier {
+  id            String    @id @default(uuid())
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  companyName   String    @map("company_name")
+  document      String    @unique
+  complement    String?
+
+  contacts      SupplierContact[] // Relação 1:N com SupplierContact
+
+  addresses     SupplierAddress[] // Relação 1:N com SupplierAddress
+
+  parts         PartSupplier[] // Relação 1:N com PartSupplier
+
+  @@map("suppliers")
+}
+
+model PartTemplate {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  name        String
+  description String
+  value       Float
+  complement  String?
+
+  orders      OrderPart[] // Relação 1:N com OrderPart
+
+  suppliers   PartSupplier[] // Relação 1:N com PartSupplier
+
+  @@map("part_templates")
+}
+
+model Manufacturer {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  name        String
+  description String
+  complement  String?
+
+  vehicles    Vehicle[] // Relação 1:N com Vehicle
+
+  @@map("manufacturers")
+}
+
+// ContactType enum definition
+
+enum ContactType {
+  PHONE
+  MAIL
+}
+
+model Contact {
+  id          String      @id @default(uuid())
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  type        ContactType
+  content     String
+  complement  String?
+
+  users       UserContact[] // Relação 1:N com UserContact
+
+  suppliers   SupplierContact[] // Relação 1:N com SupplierContact
+
+  @@map("contacts")
+}
+
+model Address {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  street      String
+  city        String
+  zipCode     String    @map("zip_code")
+  complement  String?
+
+  users       UserAddress[] // Relação 1:N com UserAddress
+
+  suppliers   SupplierAddress[] // Relação 1:N com SupplierAddress
+
+  @@map("addresses")
+}
+
+model ServiceTemplate {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  value       Float
+  name        String
+  description String
+  complement  String?
+
+  steps       ServiceStep[] // Relação 1:N com ServiceStep
+
+  orders      OrderService[] // Relação 1:N com OrderService
+
+  @@map("service_templates")
+}
+
+// N:1
+
+model Vehicle {
+  id              String        @id @default(uuid())
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  name            String
+  year            Int
+  color           String
+  description     String
+  complement      String?
+
+  // Relação N:1 com Manufacturer
+  manufacturerId  String  @map("manufacturer_id")
+  manufacturer    Manufacturer  @relation(fields: [manufacturerId], references: [id])
+
+  orders          Order[]       // Relação 1:N com Order
+
+  @@map("vehicles")
+}
+
+model Order {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  scheduled   DateTime
+  conclusion  DateTime?
+  name        String
+  budget      Float
+  value       Float
+  complement  String?
+
+  // Relação N:1 com User
+  userId  String  @map("user_id")
+  user    User   @relation(fields: [userId], references: [id])
+
+  // Relação N:1 com Vehicle
+  vehicleId String @map("vehicle_id")
+  vehicle    Vehicle @relation(fields: [vehicleId], references: [id])
+
+  statuses   OrderStatus[] // Relação 1:N com OrderStatus
+
+  services   OrderService[] // Relação 1:N com OrderService
+
+  parts      OrderPart[]    // Relação 1:N com OrderPart
+
+  @@map("orders")
+}
+
+model ServiceStep {
+  id                  String  @id @default(uuid())
+  active              Boolean @default(true)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  stepNumber          Int @map("step_number")
+  name                String
+  description         String
+  complement          String?
+
+  // Relação N:1 com ServiceTemplate
+  serviceTemplateId   String  @map("service_template_id")
+  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id])
+
+  @@map("service_steps")
+}
+
+model OrderStatus {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  description String
+  complement  String?
+
+  // Relação N:1 com Order
+  orderId   String  @map("order_id")
+  order     Order  @relation(fields: [orderId], references: [id])
+
+  @@map("order_statuses")
+}
+
+// N:N
+
+model OrderService {
+  id                  String   @id @default(uuid())
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com Order
+  orderId             String  @map("order_id")
+  order               Order    @relation(fields: [orderId], references: [id])
+
+  // Relação 1:N com ServiceTemplate
+  serviceTemplateId   String  @map("service_template_id")
+  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id])
+
+  @@map("order_services")
+}
+
+model OrderPart {
+  id               String   @id @default(uuid())
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com Order
+  orderId           String  @map("order_id")
+  order             Order    @relation(fields: [orderId], references: [id])
+
+  // Relação 1:N com PartTemplate
+  partTemplateId    String  @map("part_template_id")
+  partTemplate      PartTemplate @relation(fields: [partTemplateId], references: [id])
+
+  @@map("order_parts")
+}
+
+model UserContact {
+  id         String   @id @default(uuid())
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com User
+  userId    String  @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Relação 1:N com Contact
+  contactId String  @map("contact_id")
+  contact   Contact  @relation(fields: [contactId], references: [id])
+
+  @@map("users_contacts")
+}
+
+model UserAddress {
+  id         String   @id @default(uuid())
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com User
+  userId    String  @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Relação 1:N com Address
+  addressId String  @map("address_id")
+  address   Address  @relation(fields: [addressId], references: [id])
+
+  @@map("users_addresses")
+}
+
+model SupplierContact {
+  id            String   @id @default(uuid())
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com Supplier
+  supplierId    String @map("supplier_id")
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+
+  // Relação 1:N com Contact
+  contactId     String @map("contact_id")
+  contact       Contact @relation(fields: [contactId], references: [id])
+
+  @@map("suppliers_contacts")
+}
+
+model SupplierAddress {
+  id          String   @id @default(uuid())
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com Supplier
+  supplierId String @map("supplier_id")
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  // Relação 1:N com Address
+  addressId  String @map("address_id")
+  address    Address @relation(fields: [addressId], references: [id])
+
+  @@map("suppliers_addresses")
+}
+
+model PartSupplier {
+  id               String   @id @default(uuid())
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relação 1:N com PartTemplate
+  partTemplateId  String @map("part_template_id")
+  partTemplate    PartTemplate @relation(fields: [partTemplateId], references: [id])
+
+  // Relação 1:N com Supplier
+  supplierId      String @map("supplier_id")
+  supplier        Supplier @relation(fields: [supplierId], references: [id])
+
+  @@map("parts_suppliers")
+}
