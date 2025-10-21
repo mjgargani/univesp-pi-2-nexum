@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AddressesService {
@@ -10,7 +10,7 @@ export class AddressesService {
   async createManyForUser(
     userId: string,
     dtos: CreateAddressDto[],
-    tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
+    tx: Prisma.TransactionClient
   ) {
     const createdAddresses = [];
     for (const dto of dtos) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ContactsService {
@@ -10,7 +10,7 @@ export class ContactsService {
   async createManyForUser(
     userId: string,
     dtos: CreateContactDto[],
-    tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
+    tx: Prisma.TransactionClient
   ) {
     const createdContacts = [];
     for (const dto of dtos) {
