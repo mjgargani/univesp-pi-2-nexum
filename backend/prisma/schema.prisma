@@ -111,18 +111,22 @@ model Contact {
 }
 
 model Address {
-  id          String    @id @default(uuid())
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  street      String
-  city        String
-  zipCode     String    @map("zip_code")
-  complement  String?
+  id           String    @id @default(uuid())
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  street       String
+  number       String
+  neighborhood String
+  city         String
+  state        String
+  country      String
+  zipCode      String    @map("zip_code")
+  complement   String?
 
-  users       UserAddress[] // Relação 1:N com UserAddress
+  users        UserAddress[] // Relação 1:N com UserAddress
 
-  suppliers   SupplierAddress[] // Relação 1:N com SupplierAddress
+  suppliers    SupplierAddress[] // Relação 1:N com SupplierAddress
 
   @@map("addresses")
 }
