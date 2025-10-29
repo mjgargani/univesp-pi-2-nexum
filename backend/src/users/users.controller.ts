@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateCustomerDto, UpdateCustomerDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('customers')
 export class UsersController {
@@ -15,21 +16,21 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     const customer = this.UsersService.findOne(id);
     if (!customer) {
-      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
     return customer;
   }
 
   @Post()
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.UsersService.create(createCustomerDto);
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.UsersService.create(createUserDto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto) {
-    const customer = this.UsersService.update(id, updateCustomerDto);
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    const customer = this.UsersService.update(id,dto);
     if (!customer) {
-      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
     return customer;
   }
@@ -38,8 +39,8 @@ export class UsersController {
   remove(@Param('id') id: string) {
     const success = this.UsersService.remove(id);
     if (!success) {
-      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
-    return { message: 'Customer deleted successfully' };
+    return { message: 'Usuário desabilitado com sucesso' };
   }
 }
