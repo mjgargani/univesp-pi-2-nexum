@@ -12,6 +12,7 @@ users:
   first_name: text
   middle_name: text (optional)
   last_name: text
+  role: text
   birth_date: date (optional)
   complement: text (optional)
 

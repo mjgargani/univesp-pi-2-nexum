@@ -16,6 +16,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  MECHANIC
+  CUSTOMER
+}
+
 model User {
   id          String    @id @default(uuid())
   active      Boolean   @default(true)
@@ -27,6 +33,7 @@ model User {
   firstName   String    @map("first_name") // Mapeia o campo firstName para a coluna first_name
   middleName  String?   @map("middle_name") // Mapeia o campo middleName para a coluna middle_name
   lastName    String    @map("last_name") // Mapeia o campo lastName para a coluna last_name
+  role        UserRole  @default(CUSTOMER)
   birthDate   DateTime? @map("birth_date") // Mapeia o campo birthDate para a coluna birth_date
   complement  String?
 
@@ -38,6 +45,8 @@ model User {
 
   @@map("users") // Mapeia este modelo para a tabela 'users'
 }
+
+// Schema to DB mapping
 
 model Supplier {
   id            String    @id @default(uuid())
