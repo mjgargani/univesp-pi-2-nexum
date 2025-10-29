@@ -61,7 +61,7 @@ model Supplier {
 
   addresses     SupplierAddress[] // Relação 1:N com SupplierAddress
 
-  parts         PartSupplier[] // Relação 1:N com PartSupplier
+  parts         PartTemplateSupplier[] // Relação 1:N com PartTemplateSupplier
 
   @@map("suppliers")
 }
@@ -76,9 +76,9 @@ model PartTemplate {
   value       Float
   complement  String?
 
-  orders      OrderPart[] // Relação 1:N com OrderPart
+  orders      OrderPartTemplate[] // Relação 1:N com OrderPartTemplate
 
-  suppliers   PartSupplier[] // Relação 1:N com PartSupplier
+  suppliers   PartTemplateSupplier[] // Relação 1:N com PartTemplateSupplier
 
   @@map("part_templates")
 }
@@ -204,7 +204,7 @@ model Order {
 
   services   OrderServiceTemplate[] // Relação 1:N com OrderServiceTemplate
 
-  parts      OrderPart[]    // Relação 1:N com OrderPart
+  parts      OrderPartTemplate[]    // Relação 1:N com OrderPartTemplate
 
   @@map("orders")
 }
@@ -260,7 +260,7 @@ model OrderServiceTemplate {
   @@map("order_service_templates")
 }
 
-model OrderPart {
+model OrderPartTemplate {
   id               String   @id @default(uuid())
   active           Boolean  @default(true)
   createdAt        DateTime @default(now()) @map("created_at")
@@ -274,7 +274,7 @@ model OrderPart {
   partTemplateId    String  @map("part_template_id")
   partTemplate      PartTemplate @relation(fields: [partTemplateId], references: [id])
 
-  @@map("order_parts")
+  @@map("order_part_templates")
 }
 
 model UserContact {
@@ -345,7 +345,7 @@ model SupplierAddress {
   @@map("suppliers_addresses")
 }
 
-model PartSupplier {
+model PartTemplateSupplier {
   id               String   @id @default(uuid())
   active           Boolean  @default(true)
   createdAt        DateTime @default(now()) @map("created_at")
@@ -359,5 +359,5 @@ model PartSupplier {
   supplierId      String @map("supplier_id")
   supplier        Supplier @relation(fields: [supplierId], references: [id])
 
-  @@map("parts_suppliers")
+  @@map("part_templates_suppliers")
 }
