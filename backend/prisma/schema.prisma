@@ -153,7 +153,7 @@ model ServiceTemplate {
 
   steps       ServiceStep[] // Relação 1:N com ServiceStep
 
-  orders      OrderService[] // Relação 1:N com OrderService
+  orders      OrderServiceTemplate[] // Relação 1:N com OrderServiceTemplate
 
   @@map("service_templates")
 }
@@ -202,7 +202,7 @@ model Order {
 
   statuses   OrderStatus[] // Relação 1:N com OrderStatus
 
-  services   OrderService[] // Relação 1:N com OrderService
+  services   OrderServiceTemplate[] // Relação 1:N com OrderServiceTemplate
 
   parts      OrderPart[]    // Relação 1:N com OrderPart
 
@@ -243,7 +243,7 @@ model OrderStatus {
 
 // N:N
 
-model OrderService {
+model OrderServiceTemplate {
   id                  String   @id @default(uuid())
   active              Boolean  @default(true)
   createdAt           DateTime @default(now()) @map("created_at")
@@ -257,7 +257,7 @@ model OrderService {
   serviceTemplateId   String  @map("service_template_id")
   serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id])
 
-  @@map("order_services")
+  @@map("order_service_templates")
 }
 
 model OrderPart {
