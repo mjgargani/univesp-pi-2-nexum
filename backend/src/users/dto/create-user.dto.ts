@@ -28,6 +28,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   lastName: string;
 
+  @Type(() => Date)
   @IsDate()
   @IsOptional()
   birthDate?: Date;
@@ -37,7 +38,7 @@ export class CreateUserDto {
   complement?: string;
 
   @IsArray()
-  @ValidateNested({ each: true }) 
+  @ValidateNested({ each: true })
   @Type(() => CreateContactDto)   
   @ArrayMinSize(1)  // Pelo menos um contato
   @ArrayMaxSize(10) // Limite arbitrário para evitar excesso de contatos
