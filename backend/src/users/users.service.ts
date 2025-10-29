@@ -5,7 +5,7 @@ import { ContactsService } from 'src/contacts/contacts.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { InternalServerErrorException } from '@nestjs/common/exceptions';
+import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common/exceptions';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 // https://docs.nestjs.com/recipes/prisma#use-prisma-client-in-your-nestjs-services
@@ -65,10 +65,16 @@ export class UsersService {
 
     const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
 
-    if (userData.password) {
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(userData.password, salt);
-        dataToUpdate.password = hashedPassword;
+    if (userData.password && userData.newPassword) {
+      // Compara a senha atual antes de atualizar  
+      const user = await this.prisma.user.findUnique({ where: { id } });
+      const isPasswordValid = await bcrypt.compare(userData.password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Senha atual inválida.');
+      }
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(userData.newPassword, salt);
+      dataToUpdate.password = hashedPassword;
     } else {
         delete dataToUpdate.password; 
     }
