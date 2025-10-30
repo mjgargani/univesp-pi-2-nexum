@@ -12,6 +12,11 @@ import {
 import { CreateAddressDto } from 'src/entities/addresses/dto/create-address.dto';
 import { CreateContactDto } from 'src/entities/contacts/dto/create-contact.dto';
 
+enum UserRoles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  CUSTOMER = 'CUSTOMER',
+}
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()

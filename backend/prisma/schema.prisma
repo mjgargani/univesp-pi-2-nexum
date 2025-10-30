@@ -16,12 +16,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  MECHANIC
-  CUSTOMER
-}
+model RoleTemplate {
+  id    String   @id @default(uuid())
+  active Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name  String   @unique // Ex: "ADMIN", "CUSTOMER", "MANAGER", etc.
+  complement  String?
+  
+  // Relação de volta para a tabela de junção
+  users UserRoleTemplate[]
 
+  @@map("role_templates")
+}
 model User {
   id          String    @id @default(uuid())
   active      Boolean   @default(true)
@@ -33,10 +40,11 @@ model User {
   firstName   String    @map("first_name") // Mapeia o campo firstName para a coluna first_name
   middleName  String?   @map("middle_name") // Mapeia o campo middleName para a coluna middle_name
   lastName    String    @map("last_name") // Mapeia o campo lastName para a coluna last_name
-  role        UserRole  @default(CUSTOMER)
   birthDate   DateTime? @map("birth_date") // Mapeia o campo birthDate para a coluna birth_date
   complement  String?
 
+  roles       UserRoleTemplate[] // Relação 1:N com UserRoleTemplate
+  
   orders      Order[]   // Relação 1:N com Order
 
   contacts    UserContact[] // Relação 1:N com UserContact
@@ -194,11 +202,11 @@ model Order {
 
   // Relação N:1 com User
   userId  String  @map("user_id")
-  user    User   @relation(fields: [userId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação N:1 com Vehicle
   vehicleId String @map("vehicle_id")
-  vehicle    Vehicle @relation(fields: [vehicleId], references: [id])
+  vehicle    Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   statuses   OrderStatus[] // Relação 1:N com OrderStatus
 
@@ -221,7 +229,7 @@ model ServiceStep {
 
   // Relação N:1 com ServiceTemplate
   serviceTemplateId   String  @map("service_template_id")
-  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id])
+  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("service_steps")
 }
@@ -236,7 +244,7 @@ model OrderStatus {
 
   // Relação N:1 com Order
   orderId   String  @map("order_id")
-  order     Order  @relation(fields: [orderId], references: [id])
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("order_statuses")
 }
@@ -251,11 +259,11 @@ model OrderServiceTemplate {
 
   // Relação 1:N com Order
   orderId             String  @map("order_id")
-  order               Order    @relation(fields: [orderId], references: [id])
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com ServiceTemplate
   serviceTemplateId   String  @map("service_template_id")
-  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id])
+  serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("order_service_templates")
 }
@@ -268,11 +276,11 @@ model OrderPartTemplate {
 
   // Relação 1:N com Order
   orderId           String  @map("order_id")
-  order             Order    @relation(fields: [orderId], references: [id])
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com PartTemplate
   partTemplateId    String  @map("part_template_id")
-  partTemplate      PartTemplate @relation(fields: [partTemplateId], references: [id])
+  partTemplate      PartTemplate @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("order_part_templates")
 }
@@ -285,11 +293,11 @@ model UserContact {
 
   // Relação 1:N com User
   userId    String  @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com Contact
   contactId String  @map("contact_id")
-  contact   Contact  @relation(fields: [contactId], references: [id])
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("users_contacts")
 }
@@ -302,11 +310,11 @@ model UserAddress {
 
   // Relação 1:N com User
   userId    String  @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com Address
   addressId String  @map("address_id")
-  address   Address  @relation(fields: [addressId], references: [id])
+  address   Address  @relation(fields: [addressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("users_addresses")
 }
@@ -319,11 +327,11 @@ model SupplierContact {
 
   // Relação 1:N com Supplier
   supplierId    String @map("supplier_id")
-  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  supplier      Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com Contact
   contactId     String @map("contact_id")
-  contact       Contact @relation(fields: [contactId], references: [id])
+  contact       Contact @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("suppliers_contacts")
 }
@@ -336,11 +344,11 @@ model SupplierAddress {
 
   // Relação 1:N com Supplier
   supplierId String @map("supplier_id")
-  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com Address
   addressId  String @map("address_id")
-  address    Address @relation(fields: [addressId], references: [id])
+  address    Address @relation(fields: [addressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("suppliers_addresses")
 }
@@ -353,11 +361,29 @@ model PartTemplateSupplier {
 
   // Relação 1:N com PartTemplate
   partTemplateId  String @map("part_template_id")
-  partTemplate    PartTemplate @relation(fields: [partTemplateId], references: [id])
+  partTemplate    PartTemplate @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // Relação 1:N com Supplier
   supplierId      String @map("supplier_id")
-  supplier        Supplier @relation(fields: [supplierId], references: [id])
+  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("part_templates_suppliers")
+}
+
+model UserRoleTemplate {
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  
+  // Relação 1:N com User
+  userId String @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade) // Deleta/Altera a relação se o usuário for deletado
+  
+  // Relação 1:N com RoleTemplate
+  roleTemplateId String @map("role_template_id")
+  roleTemplate RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade) // Deleta/Altera a relação se o papel for deletado
+
+  // Chave primária composta (garante que um usuário não pode ter o mesmo papel duas vezes)
+  @@id([userId, roleTemplateId])
+  @@map("users_role_templates")
 }

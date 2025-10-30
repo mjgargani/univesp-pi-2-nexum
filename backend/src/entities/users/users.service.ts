@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common/exceptions';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { RoleTemplateName, UpdateUserDto } from './dto/update-user.dto';
 
 // https://docs.nestjs.com/recipes/prisma#use-prisma-client-in-your-nestjs-services
 
@@ -28,6 +28,12 @@ export class UsersService {
     });
   }
 
+  findOneByUser(user: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { user },
+    });
+  }
+
   async create(dto: CreateUserDto): Promise<User> {
     const { contacts, addresses, ...userData } = dto;
 
@@ -40,6 +46,19 @@ export class UsersService {
           data: {
             ...userData,
             password: hashedPassword,
+          },
+        });
+
+        const getRole = await tx.roleTemplate.findUniqueOrThrow({
+          where: {
+            name: RoleTemplateName.CUSTOMER, // Assumindo que dto.roles sempre terá pelo menos um papel
+          },
+        });
+
+        await tx.userRoleTemplate.create({
+          data: {
+            userId: user.id,
+            roleTemplateId: getRole.id,
           },
         });
 
@@ -61,7 +80,7 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
-    const { contacts, addresses, ...userData } = dto;
+    const { roles, contacts, addresses, ...userData } = dto;
 
     const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
 
@@ -85,6 +104,27 @@ export class UsersService {
           where: { id },
           data: dataToUpdate,
         });
+
+        if (roles !== undefined) {
+          await tx.userRoleTemplate.deleteMany({
+            where: { userId: id },
+          });
+
+          if (roles.length > 0) {
+            for (const roleName of roles) {
+              const role = await tx.roleTemplate.findUniqueOrThrow({
+                where: { name: roleName },
+              });
+
+              await tx.userRoleTemplate.create({
+                data: {
+                  userId: id,
+                  roleTemplateId: role.id,
+                },
+              });
+            }
+          }
+        }
 
         if (contacts !== undefined) {
           await tx.userContact.deleteMany({
@@ -113,9 +153,50 @@ export class UsersService {
     }
   }
 
-  async remove(id: string): Promise<User | null> {
+  async activate(id: string): Promise<User | null> {
     try {
       return await this.prisma.$transaction(async (tx) => {
+        await tx.userRoleTemplate.updateMany({
+          where: { userId: id },
+          data: {
+            active: true,
+          },
+        });
+        await tx.userContact.updateMany({
+          where: { userId: id },
+          data: {
+            active: true,
+          },
+        });
+        await tx.userAddress.updateMany({
+          where: { userId: id },
+          data: {
+            active: true,
+          },
+        });
+        return await tx.user.update({
+          where: { id },
+          data: {
+            active: true,
+          },
+        });
+      });
+    } catch (cause) {
+      throw new InternalServerErrorException(`Falha ao ativar o usuário '${id}'.`, {
+        cause,
+      });
+    }
+  }
+
+  async deactivate(id: string): Promise<User | null> {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        await tx.userRoleTemplate.updateMany({
+          where: { userId: id },
+          data: {
+            active: false,
+          },
+        });
         await tx.userContact.updateMany({
           where: { userId: id },
           data: {
@@ -140,5 +221,11 @@ export class UsersService {
         cause,
       });
     }
+  }
+
+  remove(id: string): Promise<User> {
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
