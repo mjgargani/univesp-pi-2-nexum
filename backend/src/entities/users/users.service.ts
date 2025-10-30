@@ -19,78 +19,96 @@ export class UsersService {
   ) {}
 
   findAll(): Promise<User[]> {
-    return this.prisma.user.findMany({
-      where: { active: true },
-      include: {
-        roles: {
-          where: { active: true },
-          include: {
-            roleTemplate: true,
+    try {
+      return this.prisma.user.findMany({
+        where: { active: true },
+        include: {
+          roles: {
+            where: { active: true },
+            include: {
+              roleTemplate: true,
+            },
+          },
+          contacts: {
+            where: { active: true },
+            include: {
+              contact: true,
+            },
+          },
+          addresses: {
+            where: { active: true },
+            include: {
+              address: true,
+            },
           },
         },
-        contacts: {
-          where: { active: true },
-          include: {
-            contact: true,
-          },
-        },
-        addresses: {
-          where: { active: true },
-          include: {
-            address: true,
-          },
-        },
-      },
-    });
+      });
+    } catch (cause) {
+      throw new InternalServerErrorException('Falha ao buscar os usuários.', {
+        cause,
+      });
+    }
   }
 
   findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { id, active: true },
-      include: {
-        roles: {
-          where: { active: true },
-          include: {
-            roleTemplate: true,
+    try {
+      return this.prisma.user.findUnique({
+        where: { id, active: true },
+        include: {
+          roles: {
+            where: { active: true },
+            include: {
+              roleTemplate: true,
+            },
+          },
+          contacts: {
+            where: { active: true },
+            include: {
+              contact: true,
+            },
+          },
+          addresses: {
+            where: { active: true },
+            include: {
+              address: true,
+            },
           },
         },
-        contacts: {
-          where: { active: true },
-          include: {
-            contact: true,
-          },
-        },
-        addresses: {
-          where: { active: true },
-          include: {
-            address: true,
-          },
-        },
-      },
-    });
+      });
+    } catch (cause) {
+      throw new InternalServerErrorException(`Falha ao buscar o usuário '${id}'.`, {
+        cause,
+      });
+    }
   }
 
   findOneByUser(userName: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { userName, active: true },
-      include: {
-        roles: {
-          where: { active: true },
-          include: {
-            roleTemplate: true,
+    try {
+      return this.prisma.user.findUnique({
+        where: { userName, active: true },
+        include: {
+          roles: {
+            where: { active: true },
+            include: {
+              roleTemplate: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (cause) {
+      throw new InternalServerErrorException(`Falha ao buscar o usuário '${userName}'.`, {
+        cause,
+      });
+    }
   }
 
   async create(dto: CreateUserDto): Promise<User> {
-    const { contacts, addresses, ...userData } = dto;
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
-
     try {
+      const { contacts, addresses, ...userData } = dto;
+
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(userData.password, salt);
+
       return await this.prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
           data: {
@@ -130,11 +148,11 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
-    const { roles, contacts, addresses, ...userData } = dto;
-
-    const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
-
     try {
+      const { roles, contacts, addresses, ...userData } = dto;
+
+      const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
+
       return await this.prisma.$transaction(async (tx) => {
         if (userData.password && userData.newPassword) {
           // Compara a senha atual antes de atualizar
@@ -274,8 +292,14 @@ export class UsersService {
   }
 
   remove(id: string): Promise<User> {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+    try {
+      return this.prisma.user.delete({
+        where: { id },
+      });
+    } catch (cause) {
+      throw new InternalServerErrorException(`Falha ao deletar o usuário '${id}'.`, {
+        cause,
+      });
+    }
   }
 }

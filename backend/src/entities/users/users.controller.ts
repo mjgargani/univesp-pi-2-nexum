@@ -1,69 +1,70 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
-@Controller('customers')
+@Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly UsersService: UsersService) {}
 
   @Get()
   @Roles('admin')
   @UseGuards(RolesGuard)
-  findAll() {
+  async findAll() {
     return this.UsersService.findAll();
   }
 
   @Get(':id')
   @Roles('admin')
   @UseGuards(RolesGuard)
-  findOne(@Param('id') id: string) {
-    const customer = this.UsersService.findOne(id);
-    if (!customer) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-    }
-    return customer;
+  async findOne(@Param('id') id: string) {
+    return this.UsersService.findOne(id);
   }
 
-  @Get('profile/:id')
+  @Get('profile')
   @Roles('admin', 'user')
   @UseGuards(RolesGuard)
-  getProfile(@Param('id') id: string) {
-    const customer = this.UsersService.findOne(id);
-    if (!customer) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-    }
-    return customer;
+  async getProfile(@Request() req) {
+    const userId = req.user.sub;
+    return this.UsersService.findOne(userId);
   }
 
   @Post()
   @Roles('admin')
   @UseGuards(RolesGuard)
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.UsersService.create(createUserDto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @Roles('admin')
   @UseGuards(RolesGuard)
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    const customer = this.UsersService.update(id, dto);
-    if (!customer) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-    }
-    return customer;
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.UsersService.update(id, dto);
+  }
+
+  @Patch(':id/activate')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  async activate(@Param('id') id: string) {
+    return this.UsersService.activate(id);
+  }
+
+  @Patch(':id/deactivate')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  async deactivate(@Param('id') id: string) {
+    return this.UsersService.deactivate(id);
   }
 
   @Delete(':id')
   @Roles('admin')
   @UseGuards(RolesGuard)
-  remove(@Param('id') id: string) {
-    const success = this.UsersService.remove(id);
-    if (!success) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-    }
-    return { message: 'Usuário desabilitado com sucesso' };
+  async remove(@Param('id') id: string) {
+    return this.UsersService.remove(id);
   }
 }
