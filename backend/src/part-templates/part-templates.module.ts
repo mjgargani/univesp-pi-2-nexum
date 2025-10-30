@@ -4,6 +4,6 @@ import { PartTemplatesController } from './part-templates.controller';
 
 @Module({
   providers: [PartTemplatesService],
-  controllers: [PartTemplatesController]
+  controllers: [PartTemplatesController],
 })
 export class PartTemplatesModule {}

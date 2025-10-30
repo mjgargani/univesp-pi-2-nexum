@@ -30,7 +30,7 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const { contacts, addresses, ...userData } = dto;
-    
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userData.password, salt);
 
@@ -78,21 +78,21 @@ export class UsersService {
           const hashedPassword = await bcrypt.hash(userData.newPassword, salt);
           dataToUpdate.password = hashedPassword;
         } else {
-          delete dataToUpdate.password; 
+          delete dataToUpdate.password;
         }
 
         const updatedUser = await tx.user.update({
-            where: { id },
-            data: dataToUpdate
+          where: { id },
+          data: dataToUpdate,
         });
 
         if (contacts !== undefined) {
-            await tx.userContact.deleteMany({
-                where: { userId: id },
-            });
-            if (contacts.length > 0) {
-                await this.contactsService.createManyForUser(id, contacts, tx);
-            }
+          await tx.userContact.deleteMany({
+            where: { userId: id },
+          });
+          if (contacts.length > 0) {
+            await this.contactsService.createManyForUser(id, contacts, tx);
+          }
         }
 
         if (addresses !== undefined) {
@@ -142,4 +142,3 @@ export class UsersService {
     }
   }
 }
-    

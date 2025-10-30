@@ -56,18 +56,16 @@ describe('UsersService', () => {
       document: '12345678900',
       firstName: 'John',
       lastName: 'Doe',
-      contacts: [
-        { type: 'MAIL', content: 'john.doe@example.com' },
-      ],
+      contacts: [{ type: 'MAIL', content: 'john.doe@example.com' }],
       addresses: [
-        { 
-          street: '123 Main St', 
-          number: '100', 
-          neighborhood: 'Downtown', 
-          city: 'Anytown', 
-          state: 'CA', 
-          country: 'USA', 
-          zipCode: '12345' 
+        {
+          street: '123 Main St',
+          number: '100',
+          neighborhood: 'Downtown',
+          city: 'Anytown',
+          state: 'CA',
+          country: 'USA',
+          zipCode: '12345',
         },
       ],
     };
@@ -78,9 +76,9 @@ describe('UsersService', () => {
     await service.create(createUserDto);
 
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-    
+
     expect(tx.user.create).toHaveBeenCalledTimes(1);
-    
+
     expect(mockContactsService.createManyForUser).toHaveBeenCalledTimes(1);
   });
 });

@@ -6,12 +6,8 @@ import { Prisma } from 'generated/client';
 @Injectable()
 export class AddressesService {
   constructor(private readonly prisma: PrismaService) {}
-  
-  async createManyForUser(
-    userId: string,
-    dtos: CreateAddressDto[],
-    tx: Prisma.TransactionClient
-  ) {
+
+  async createManyForUser(userId: string, dtos: CreateAddressDto[], tx: Prisma.TransactionClient) {
     const createdAddresses = [];
     for (const dto of dtos) {
       const contact = await tx.address.create({ data: dto });

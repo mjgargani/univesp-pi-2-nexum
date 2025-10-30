@@ -1,5 +1,5 @@
-import { ContactType } from "@prisma/client";
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { ContactType } from '@prisma/client';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateContactDto {
   @IsEnum(ContactType)
@@ -9,7 +9,7 @@ export class CreateContactDto {
   @IsString()
   @IsNotEmpty()
   content: string;
-  
+
   @IsString()
   @IsOptional()
   complement?: string;

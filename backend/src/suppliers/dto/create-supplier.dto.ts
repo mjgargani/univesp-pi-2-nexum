@@ -1,7 +1,16 @@
-import { Type } from "class-transformer";
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsNotEmpty, IsOctal, IsOptional, IsString, ValidateNested } from "class-validator";
-import { CreateAddressDto } from "src/addresses/dto/create-address.dto";
-import { CreateContactDto } from "src/contacts/dto/create-contact.dto";
+import { Type } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  IsOctal,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { CreateAddressDto } from 'src/addresses/dto/create-address.dto';
+import { CreateContactDto } from 'src/contacts/dto/create-contact.dto';
 
 export class CreateSupplierDto {
   @IsString()
@@ -18,15 +27,15 @@ export class CreateSupplierDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateContactDto)   
-  @ArrayMinSize(1)  // Pelo menos um contato
+  @Type(() => CreateContactDto)
+  @ArrayMinSize(1) // Pelo menos um contato
   @ArrayMaxSize(10) // Limite arbitrário para evitar excesso de contatos
   contacts: CreateContactDto[];
-  
+
   @IsArray()
-  @ValidateNested({ each: true }) 
-  @Type(() => CreateAddressDto)   
-  @ArrayMinSize(1)  // Pelo menos um endereço
+  @ValidateNested({ each: true })
+  @Type(() => CreateAddressDto)
+  @ArrayMinSize(1) // Pelo menos um endereço
   @ArrayMaxSize(10) // Limite arbitrário para evitar excesso de endereços
   addresses: CreateAddressDto[];
 }

@@ -7,11 +7,7 @@ import { Prisma } from 'generated/client';
 export class ContactsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createManyForUser(
-    userId: string,
-    dtos: CreateContactDto[],
-    tx: Prisma.TransactionClient
-  ) {
+  async createManyForUser(userId: string, dtos: CreateContactDto[], tx: Prisma.TransactionClient) {
     const createdContacts = [];
     for (const dto of dtos) {
       const contact = await tx.contact.create({ data: dto });

@@ -49,7 +49,7 @@ export class UsersController {
   @Roles('admin')
   @UseGuards(RolesGuard)
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    const customer = this.UsersService.update(id,dto);
+    const customer = this.UsersService.update(id, dto);
     if (!customer) {
       throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
