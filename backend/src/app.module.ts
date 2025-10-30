@@ -12,6 +12,7 @@ import { SuppliersModule } from './entities/suppliers/suppliers.module';
 import { ManufacturersModule } from './entities/manufacturers/manufacturers.module';
 import { VehiclesModule } from './entities/vehicles/vehicles.module';
 import { ServiceStepsModule } from './entities/service-steps/service-steps.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ServiceStepsModule } from './entities/service-steps/service-steps.modul
     ManufacturersModule,
     VehiclesModule,
     ServiceStepsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
