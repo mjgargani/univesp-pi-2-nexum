@@ -65,22 +65,22 @@ export class UsersService {
 
     const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
 
-    if (userData.password && userData.newPassword) {
-      // Compara a senha atual antes de atualizar  
-      const user = await this.prisma.user.findUnique({ where: { id } });
-      const isPasswordValid = await bcrypt.compare(userData.password, user.password);
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Senha atual inválida.');
-      }
-      const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(userData.newPassword, salt);
-      dataToUpdate.password = hashedPassword;
-    } else {
-        delete dataToUpdate.password; 
-    }
-
     try {
       return await this.prisma.$transaction(async (tx) => {
+        if (userData.password && userData.newPassword) {
+          // Compara a senha atual antes de atualizar
+          const user = await tx.user.findUnique({ where: { id } });
+          const isPasswordValid = await bcrypt.compare(userData.password, user.password);
+          if (!isPasswordValid) {
+            throw new UnauthorizedException('Senha atual inválida.');
+          }
+          const salt = await bcrypt.genSalt();
+          const hashedPassword = await bcrypt.hash(userData.newPassword, salt);
+          dataToUpdate.password = hashedPassword;
+        } else {
+          delete dataToUpdate.password; 
+        }
+
         const updatedUser = await tx.user.update({
             where: { id },
             data: dataToUpdate
@@ -96,12 +96,12 @@ export class UsersService {
         }
 
         if (addresses !== undefined) {
-            await tx.userAddress.deleteMany({
-                where: { userId: id },
-            });
-            if (addresses.length > 0) {
-                await this.addressesService.createManyForUser(id, addresses, tx);
-            }
+          await tx.userAddress.deleteMany({
+            where: { userId: id },
+          });
+          if (addresses.length > 0) {
+            await this.addressesService.createManyForUser(id, addresses, tx);
+          }
         }
 
         return updatedUser;
