@@ -1,25 +1,46 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsNotEmpty,
-  IsOctal,
-  IsOptional,
   IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsArray,
   ValidateNested,
+  ArrayMinSize,
+  ArrayMaxSize,
 } from 'class-validator';
-import { CreateAddressDto } from 'src/addresses/dto/create-address.dto';
-import { CreateContactDto } from 'src/contacts/dto/create-contact.dto';
+import { CreateAddressDto } from 'src/entities/addresses/dto/create-address.dto';
+import { CreateContactDto } from 'src/entities/contacts/dto/create-contact.dto';
 
-export class CreateSupplierDto {
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  companyName: string;
+  user: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 
   @IsString()
   @IsNotEmpty()
   document: string;
+
+  @IsString()
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsString()
+  @IsOptional()
+  middleName?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
+  birthDate?: Date;
 
   @IsString()
   @IsOptional()

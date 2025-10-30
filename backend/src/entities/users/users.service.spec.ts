@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContactsService } from 'src/contacts/contacts.service';
-import { AddressesService } from 'src/addresses/addresses.service';
-import { createPrismaMock } from '../../test/mocks/prisma.mock';
+import { ContactsService } from 'src/entities/contacts/contacts.service';
+import { AddressesService } from 'src/entities/addresses/addresses.service';
+import { createPrismaMock } from '../../../test/mocks/prisma.mock';
 import { CreateUserDto } from './dto/create-user.dto';
 
 const mockContactsService = {
