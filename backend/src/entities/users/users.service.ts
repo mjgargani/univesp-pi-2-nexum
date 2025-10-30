@@ -19,18 +19,68 @@ export class UsersService {
   ) {}
 
   findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      where: { active: true },
+      include: {
+        roles: {
+          where: { active: true },
+          include: {
+            roleTemplate: true,
+          },
+        },
+        contacts: {
+          where: { active: true },
+          include: {
+            contact: true,
+          },
+        },
+        addresses: {
+          where: { active: true },
+          include: {
+            address: true,
+          },
+        },
+      },
+    });
   }
 
   findOne(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: { id },
+      where: { id, active: true },
+      include: {
+        roles: {
+          where: { active: true },
+          include: {
+            roleTemplate: true,
+          },
+        },
+        contacts: {
+          where: { active: true },
+          include: {
+            contact: true,
+          },
+        },
+        addresses: {
+          where: { active: true },
+          include: {
+            address: true,
+          },
+        },
+      },
     });
   }
 
-  findOneByUser(user: string): Promise<User | null> {
+  findOneByUser(userName: string): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: { user },
+      where: { userName, active: true },
+      include: {
+        roles: {
+          where: { active: true },
+          include: {
+            roleTemplate: true,
+          },
+        },
+      },
     });
   }
 
@@ -73,7 +123,7 @@ export class UsersService {
         return user;
       });
     } catch (cause) {
-      throw new InternalServerErrorException(`Falha ao criar o usuário '${dto.user}'.`, {
+      throw new InternalServerErrorException(`Falha ao criar o usuário '${dto.userName}'.`, {
         cause,
       });
     }
@@ -88,7 +138,7 @@ export class UsersService {
       return await this.prisma.$transaction(async (tx) => {
         if (userData.password && userData.newPassword) {
           // Compara a senha atual antes de atualizar
-          const user = await tx.user.findUnique({ where: { id } });
+          const user = await tx.user.findUnique({ where: { id, active: true } });
           const isPasswordValid = await bcrypt.compare(userData.password, user.password);
           if (!isPasswordValid) {
             throw new UnauthorizedException('Senha atual inválida.');
@@ -101,7 +151,7 @@ export class UsersService {
         }
 
         const updatedUser = await tx.user.update({
-          where: { id },
+          where: { id, active: true },
           data: dataToUpdate,
         });
 
@@ -157,25 +207,25 @@ export class UsersService {
     try {
       return await this.prisma.$transaction(async (tx) => {
         await tx.userRoleTemplate.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: false },
           data: {
             active: true,
           },
         });
         await tx.userContact.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: false },
           data: {
             active: true,
           },
         });
         await tx.userAddress.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: false },
           data: {
             active: true,
           },
         });
         return await tx.user.update({
-          where: { id },
+          where: { id, active: false },
           data: {
             active: true,
           },
@@ -192,25 +242,25 @@ export class UsersService {
     try {
       return await this.prisma.$transaction(async (tx) => {
         await tx.userRoleTemplate.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: true },
           data: {
             active: false,
           },
         });
         await tx.userContact.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: true },
           data: {
             active: false,
           },
         });
         await tx.userAddress.updateMany({
-          where: { userId: id },
+          where: { userId: id, active: true },
           data: {
             active: false,
           },
         });
         return await tx.user.update({
-          where: { id },
+          where: { id, active: true },
           data: {
             active: false,
           },

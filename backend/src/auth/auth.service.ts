@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/entities/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { User } from 'generated/client';
+import { RoleTemplateName } from 'src/entities/users/dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,10 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    const payload = { username: user.user, sub: user.id, roles: [user.roles] };
+  async login(user: User & { roles: { roleTemplate: { name: RoleTemplateName } }[] }) {
+    const payload = { username: user.userName, sub: user.id, roles: user.roles.map((role) => role.roleTemplate.name) };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }
