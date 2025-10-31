@@ -45,11 +45,11 @@ model User {
 
   roles       UserRoleTemplate[] // Relação 1:N com UserRoleTemplate
   
-  orders      Order[]   // Relação 1:N com Order
-
   contacts    UserContact[] // Relação 1:N com UserContact
 
   addresses   UserAddress[] // Relação 1:N com UserAddress
+
+  vehicles    UserVehicleTemplate[] // Relação 1:N com UserVehicleTemplate
 
   @@map("users") // Mapeia este modelo para a tabela 'users'
 }
@@ -100,7 +100,7 @@ model Manufacturer {
   description String
   complement  String?
 
-  vehicles    Vehicle[] // Relação 1:N com Vehicle
+  vehicles    VehicleTemplate[] // Relação 1:N com VehicleTemplate
 
   @@map("manufacturers")
 }
@@ -168,24 +168,22 @@ model ServiceTemplate {
 
 // N:1
 
-model Vehicle {
+model VehicleTemplate {
   id              String        @id @default(uuid())
   active          Boolean       @default(true)
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
   name            String
-  year            Int
-  color           String
-  description     String
   complement      String?
+
+  // Relação N:1 com UserVehicleTemplate
+  users           UserVehicleTemplate[]
 
   // Relação N:1 com Manufacturer
   manufacturerId  String  @map("manufacturer_id")
   manufacturer    Manufacturer  @relation(fields: [manufacturerId], references: [id])
 
-  orders          Order[]       // Relação 1:N com Order
-
-  @@map("vehicles")
+  @@map("vehicle_templates")
 }
 
 model Order {
@@ -193,20 +191,16 @@ model Order {
   active      Boolean   @default(true)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
+  number      Int       @unique
   scheduled   DateTime
   conclusion  DateTime?
-  name        String
   budget      Float
   value       Float
   complement  String?
 
-  // Relação N:1 com User
-  userId  String  @map("user_id")
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  // Relação N:1 com Vehicle
-  vehicleId String @map("vehicle_id")
-  vehicle    Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // Relação N:1 com a instância do veículo do usuário
+  userVehicleTemplateId   String @map("user_vehicle_template_id")
+  userVehicleTemplate     UserVehicleTemplate @relation(fields: [userVehicleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   statuses   OrderStatus[] // Relação 1:N com OrderStatus
 
@@ -215,6 +209,14 @@ model Order {
   parts      OrderPartTemplate[]    // Relação 1:N com OrderPartTemplate
 
   @@map("orders")
+}
+
+// 'Singleton' para controle do último número de ordem utilizado
+model OrderCounter {
+  id        Int @id @default(1)
+  lastOrder Int @default(1000) // Começa a contagem em 1000
+
+  @@map("order_counter")
 }
 
 model ServiceStep {
@@ -386,4 +388,26 @@ model UserRoleTemplate {
   // Chave primária composta (garante que um usuário não pode ter o mesmo papel duas vezes)
   @@id([userId, roleTemplateId])
   @@map("users_role_templates")
+}
+
+model UserVehicleTemplate {
+  id         String   @id @default(uuid())
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  year       Int
+  color      String
+  complement String?
+
+  // Relação 1:N com User
+  userId    String  @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Relação 1:N com VehicleTemplate
+  vehicleTemplateId String  @map("vehicle_template_id")
+  vehicleTemplate   VehicleTemplate  @relation(fields: [vehicleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  orders          Order[]       // Relação 1:N com Order (UMA instância de carro pode ter VÁRIAS ordens)
+
+  @@map("users_vehicle_templates")
 }
