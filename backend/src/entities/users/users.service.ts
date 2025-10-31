@@ -5,8 +5,14 @@ import { ContactsService } from 'src/entities/contacts/contacts.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common/exceptions';
+import {
+  ConflictException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common/exceptions';
 import { RoleTemplateName, UpdateUserDto } from './dto/update-user.dto';
+import { PrismaErrorCodes } from 'src/prisma/errorCodes.type';
 
 // https://docs.nestjs.com/recipes/prisma#use-prisma-client-in-your-nestjs-services
 
@@ -44,9 +50,17 @@ export class UsersService {
         },
       });
     } catch (cause) {
-      throw new InternalServerErrorException('Falha ao buscar os usuários.', {
-        cause,
-      });
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException('Usuários não encontrados.', { cause });
+        }
+      }
+
+      throw new InternalServerErrorException('Falha interna ao buscar usuários.', { cause });
     }
   }
 
@@ -76,9 +90,17 @@ export class UsersService {
         },
       });
     } catch (cause) {
-      throw new InternalServerErrorException(`Falha ao buscar o usuário '${id}'.`, {
-        cause,
-      });
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
+        }
+      }
+
+      throw new InternalServerErrorException(`Falha interna ao buscar o usuário '${id}'.`, { cause });
     }
   }
 
@@ -96,7 +118,17 @@ export class UsersService {
         },
       });
     } catch (cause) {
-      throw new InternalServerErrorException(`Falha ao buscar o usuário '${userName}'.`, {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${userName}' não encontrado.`, { cause });
+        }
+      }
+
+      throw new InternalServerErrorException(`Falha interna ao buscar o usuário '${userName}'.`, {
         cause,
       });
     }
@@ -141,7 +173,22 @@ export class UsersService {
         return user;
       });
     } catch (cause) {
-      throw new InternalServerErrorException(`Falha ao criar o usuário '${dto.userName}'.`, {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
+          throw new ConflictException(`Usuário '${dto.userName}' já existe.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
+          throw new ConflictException(`Usuário '${dto.userName}' possui dados obrigatórios não preenchidos.`, {
+            cause,
+          });
+        }
+      }
+
+      throw new InternalServerErrorException(`Falha interna ao criar o usuário '${dto.userName}'.`, {
         cause,
       });
     }
@@ -215,6 +262,24 @@ export class UsersService {
         return updatedUser;
       });
     } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
+          throw new ConflictException(`Usuário com dados fornecidos já existe.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
+          throw new ConflictException(`Usuário '${id}' possui dados obrigatórios não preenchidos.`, {
+            cause,
+          });
+        }
+      }
+
       throw new InternalServerErrorException(`Falha ao atualizar o usuário '${id}'.`, {
         cause,
       });
@@ -250,6 +315,16 @@ export class UsersService {
         });
       });
     } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
+        }
+      }
+
       throw new InternalServerErrorException(`Falha ao ativar o usuário '${id}'.`, {
         cause,
       });
@@ -285,6 +360,16 @@ export class UsersService {
         });
       });
     } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
+        }
+      }
+
       throw new InternalServerErrorException(`Falha ao desativar o usuário '${id}'.`, {
         cause,
       });
@@ -297,6 +382,16 @@ export class UsersService {
         where: { id },
       });
     } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
+        }
+      }
+
       throw new InternalServerErrorException(`Falha ao deletar o usuário '${id}'.`, {
         cause,
       });
