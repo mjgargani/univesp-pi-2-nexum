@@ -36,8 +36,8 @@ export class UsersController {
   @Post()
   @Roles('admin')
   @UseGuards(RolesGuard)
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.UsersService.create(createUserDto);
+  async create(@Body() dto: CreateUserDto) {
+    return this.UsersService.create(dto);
   }
 
   @Patch(':id')

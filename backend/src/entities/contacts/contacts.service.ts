@@ -23,4 +23,21 @@ export class ContactsService {
       data: junctionData,
     });
   }
+
+  async createManyForSupplier(supplierId: string, dtos: CreateContactDto[], tx: Prisma.TransactionClient) {
+    const createdContacts = [];
+    for (const dto of dtos) {
+      const contact = await tx.contact.create({ data: dto });
+      createdContacts.push(contact);
+    }
+
+    const junctionData = createdContacts.map((contact) => ({
+      supplierId: supplierId,
+      contactId: contact.id,
+    }));
+
+    return tx.supplierContact.createMany({
+      data: junctionData,
+    });
+  }
 }
