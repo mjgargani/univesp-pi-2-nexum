@@ -33,6 +33,7 @@ import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
  * - [K4X3xI] {@link https://www.jwt.io/introduction}
  * - [bQMfrj] {@link https://en.wikipedia.org/wiki/Bcrypt}
  * - [Wb6m3Q] {@link https://www.prisma.io/docs/orm/prisma-client/queries/transactions#the-transaction-api}
+ * - [1I7hWb] {@link https://www.prisma.io/docs/orm/prisma-client/queries/relation-queries#create-a-single-record-and-multiple-related-records}
  *
  * ---
  *
@@ -273,49 +274,93 @@ export class UsersService {
   // NOTE: Criar um novo usuário na entidade User, com hash de senha (utilizando a biblioteca
   // bcrypt [bQMfrj]) e criação de contatos e endereços. Retorna o usuário criado.
   async create(dto: CreateUserDto): Promise<User> {
-    let userId: string;
+    // (DEPRECIADO em função de [1I7hWb]) let userId: string;
     try {
-      const { contacts, addresses, ...userData } = dto;
+      const { contacts: contactsData, addresses: addressesData, ...userData } = dto;
 
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(userData.password, salt);
 
-      // NOTE: Uma '$transaction' (transação), é uma forma de garantir que múltiplas operações
-      // no banco de dados sejam executadas de forma atômica. Ou seja, ou todas as operações
-      // são concluídas com sucesso, ou nenhuma delas é aplicada, mantendo a integridade
-      // dos dados [Wb6m3Q], um erro aqui implicará em "rollback" de todas as operações.
-      await this.prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            ...userData,
-            password: hashedPassword,
+      // (DEPRECIADO em função de [1I7hWb]) Uma '$transaction' (transação), é uma forma de
+      // garantir que múltiplas operações no banco de dados sejam executadas de forma 
+      // atômica. Ou seja, ou todas as operações são concluídas com sucesso, ou nenhuma 
+      // delas é aplicada, mantendo a integridade dos dados [Wb6m3Q], um erro aqui 
+      // implicará em "rollback" de todas as operações.
+      // await this.prisma.$transaction(async (tx) => {
+      //   const user = await tx.user.create({
+      //     data: {
+      //       ...userData,
+      //       password: hashedPassword,
+      //     },
+      //   });
+      //   const getRole = await tx.roleTemplate.findUniqueOrThrow({
+      //     where: {
+      //       name: RoleTemplateName.CUSTOMER, // Assumindo que dto.roles sempre terá pelo menos um papel
+      //     },
+      //   });
+      //   await tx.userRoleTemplate.create({
+      //     data: {
+      //       userId: user.id,
+      //       roleTemplateId: getRole.id,
+      //     },
+      //   });
+      //   userId = user.id;
+      //   if (contacts && contacts.length > 0) {
+      //     await this.contactsService.createManyForUser(user.id, contacts, tx);
+      //   }
+      //   if (addresses && addresses.length > 0) {
+      //     await this.addressesService.createManyForUser(user.id, addresses, tx);
+      //   }
+      // });
+      // return await this.findOne(userId);
+
+      // NOTE: Utilizando a técnica de criação de múltiplos registros relacionados
+      // em uma única operação atômica [1I7hWb], simplificando o código e melhorando
+      // a performance. Lembrando que, há pelo menos um contato e um endereço
+      // obrigatórios para criar um usuário (validações no DTO).
+      return await this.prisma.user.create({
+        data: {
+          ...userData,
+          password: hashedPassword,
+          roles: {
+            create: {
+              roleTemplate: {
+                connect: {
+                  name: RoleTemplateName.CUSTOMER, // Assumindo que dto.roles sempre terá pelo menos um papel
+                },
+              },
+            },
           },
-        });
-
-        const getRole = await tx.roleTemplate.findUniqueOrThrow({
-          where: {
-            name: RoleTemplateName.CUSTOMER, // Assumindo que dto.roles sempre terá pelo menos um papel
+          contacts: {
+            createMany: {
+              data: contactsData
+            },
           },
-        });
-
-        await tx.userRoleTemplate.create({
-          data: {
-            userId: user.id,
-            roleTemplateId: getRole.id,
+          addresses: {
+            createMany: addressesData?
           },
-        });
-        userId = user.id;
-
-        if (contacts && contacts.length > 0) {
-          await this.contactsService.createManyForUser(user.id, contacts, tx);
-        }
-
-        if (addresses && addresses.length > 0) {
-          await this.addressesService.createManyForUser(user.id, addresses, tx);
-        }
+        },
+        include: {
+          roles: {
+            where: { active: true },
+            include: {
+              roleTemplate: true,
+            },
+          },
+          contacts: {
+            where: { active: true },
+            include: {
+              contact: true,
+            },
+          },
+          addresses: {
+            where: { active: true },
+            include: {
+              address: true,
+            },
+          },
+        },
       });
-
-      return await this.findOne(userId);
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
         throw new UnauthorizedException('Acesso não autorizado.', { cause });
