@@ -80,7 +80,6 @@ model PartTemplate {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   name        String
-  description String
   value       Float
   complement  String?
 
