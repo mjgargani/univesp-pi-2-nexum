@@ -1,78 +1,166 @@
-// import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-// import { Prisma } from 'generated/client';
-// import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
-// import { PrismaService } from 'src/prisma/prisma.service';
-// import { CreatePartTemplateDto } from './dto/create-part-template.dto';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Prisma } from 'generated/client';
+import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreatePartTemplateDto } from './dto/create-part-template.dto';
+import { UpdatePartTemplateDto } from './dto/update-part-template.dto';
 
-// @Injectable()
-// export class PartTemplatesService {
-//   constructor(private readonly prisma: PrismaService) {}
+@Injectable()
+export class PartTemplatesService {
+  constructor(private readonly prisma: PrismaService) {}
 
-//   async findAll() {
-//     return this.prisma.partTemplate.findMany();
-//   }
+  async findAll() {
+    try {
+      return this.prisma.partTemplate.findMany({
+        include: {
+          suppliers: true,
+        },
+      });
+    } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
 
-//   async findOne(id: string) {
-//     return this.prisma.partTemplate.findUnique({ where: { id } });
-//   }
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException('Peças não encontradas.', { cause });
+        }
+      }
 
-//   async create(dto: CreatePartTemplateDto) {
-//     let partTemplateId: string;
-//     try {
-//       const { supplierIds, ...partTemplateData } = dto;
+      throw new InternalServerErrorException('Falha ao buscar peças.', {
+        cause,
+      });
+    }
+  }
 
-//       await this.prisma.$transaction(async (tx) => {
-//         const partTemplate = await tx.partTemplate.create({
-//           data: partTemplateData,
-//         });
+  async findOne(id: string) {
+    try {
+      return this.prisma.partTemplate.findUnique({ where: { id }, include: { suppliers: true } });
+    } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
 
-//         partTemplateId = partTemplate.id;
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Peça '${id}' não encontrada.`, { cause });
+        }
+      }
 
-//         if (supplierIds && supplierIds.length > 0) {
-//           const connectSuppliers = supplierIds.map((supplierId) => ({
-//             id: supplierId,
-//           }));
+      throw new InternalServerErrorException(`Falha ao buscar a peça '${id}'.`, {
+        cause,
+      });
+    }
+  }
 
-//           await tx.partTemplate.update({
-//             where: { id: partTemplate.id },
-//             data: {
-//               suppliers: {
-//                 connect: connectSuppliers,
-//               },
-//             },
-//           });
-//         }
-//       });
+  async create(dto: CreatePartTemplateDto) {
+    try {
+      const { supplierIds, ...partTemplateData } = dto;
 
-//       return this.findOne(partTemplateId);
-//     } catch (cause) {
-//       if (cause instanceof UnauthorizedException) {
-//         throw new UnauthorizedException('Acesso não autorizado.', { cause });
-//       }
+      const partTemplate = await this.prisma.partTemplate.create({
+        data: {
+          ...partTemplateData,
+          suppliers: {
+            connect: supplierIds.map((supplierId) => ({ id: supplierId })),
+          },
+        },
+        include: {
+          suppliers: true,
+        },
+      });
 
-//       if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-//         if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-//           throw new NotFoundException(`Usuário '${id}' não encontrado.`, { cause });
-//         }
-//       }
+      return partTemplate;
+    } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
 
-//       throw new InternalServerErrorException(`Falha interna ao buscar o usuário '${id}'.`, { cause });
-//     }
-//   }
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
+          throw new ConflictException(`Peça '${dto.name}' já existe.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
+          throw new ConflictException(`Peça '${dto.name}' possui dados obrigatórios não preenchidos.`, {
+            cause,
+          });
+        }
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Um ou mais fornecedores em 'supplierIds' não foram encontrados.`, { cause });
+        }
+      }
 
-//   async update(id: string, data: any) {
-//     return this.prisma.partTemplate.update({ where: { id }, data });
-//   }
+      throw new InternalServerErrorException('Falha ao criar a peça.', {
+        cause,
+      });
+    }
+  }
 
-//   async activate(id: string) {
-//     return this.prisma.partTemplate.update({ where: { id }, data: { active: true } });
-//   }
+  async update(id: string, dto: UpdatePartTemplateDto) {
+    try {
+      const { supplierIds, ...partTemplateData } = dto;
 
-//   async deactivate(id: string) {
-//     return this.prisma.partTemplate.update({ where: { id }, data: { active: false } });
-//   }
+      const dataToUpdate: Prisma.PartTemplateUpdateInput = { ...partTemplateData };
 
-//   async remove(id: string) {
-//     return this.prisma.partTemplate.delete({ where: { id } });
-//   }
-// }
+      if (supplierIds) {
+        dataToUpdate.suppliers = {
+          set: [],
+          connect: supplierIds.map((supplierId) => ({ id: supplierId })),
+        };
+      }
+
+      return this.prisma.partTemplate.update({
+        where: { id },
+        data: dataToUpdate,
+        include: { suppliers: true },
+      });
+    } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Peça '${id}' não encontrada.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
+          throw new ConflictException(`Peça com dados fornecidos já existe.`, { cause });
+        }
+        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
+          throw new ConflictException(`Peça '${id}' possui dados obrigatórios não preenchidos.`, {
+            cause,
+          });
+        }
+      }
+
+      throw new InternalServerErrorException(`Falha ao atualizar o peça '${id}'.`, {
+        cause,
+      });
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      return this.prisma.partTemplate.delete({ where: { id } });
+    } catch (cause) {
+      if (cause instanceof UnauthorizedException) {
+        throw new UnauthorizedException('Acesso não autorizado.', { cause });
+      }
+
+      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
+          throw new NotFoundException(`Peça '${id}' não encontrada.`, { cause });
+        }
+      }
+
+      throw new InternalServerErrorException(`Falha ao deletar a peça '${id}'.`, {
+        cause,
+      });
+    }
+  }
+}
