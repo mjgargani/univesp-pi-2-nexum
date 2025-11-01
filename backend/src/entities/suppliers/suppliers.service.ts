@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ContactsService } from '../contacts/contacts.service';
 import { AddressesService } from '../addresses/addresses.service';
 import { Prisma, Supplier } from 'generated/client';
-import { PrismaErrorCodes } from 'src/prisma/errorCodes.type';
+import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 

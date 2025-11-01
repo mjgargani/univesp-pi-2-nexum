@@ -12,7 +12,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common/exceptions';
 import { RoleTemplateName, UpdateUserDto } from './dto/update-user.dto';
-import { PrismaErrorCodes } from 'src/prisma/errorCodes.type';
+import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
 
 /**
  * NOTE: Referências:

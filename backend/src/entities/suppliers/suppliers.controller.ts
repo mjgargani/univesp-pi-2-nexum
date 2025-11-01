@@ -5,7 +5,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
-import { RoleTemplateName } from '../users/dto/update-user.dto';
+import { RoleTemplateName } from 'src/auth/roles.enum';
 
 @Controller('suppliers')
 @UseGuards(JwtAuthGuard, RolesGuard)

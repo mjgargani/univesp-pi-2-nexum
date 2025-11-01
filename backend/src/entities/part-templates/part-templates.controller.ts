@@ -5,7 +5,7 @@ import { CreatePartTemplateDto } from './dto/create-part-template.dto';
 import { UpdatePartTemplateDto } from './dto/update-part-template.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { RoleTemplateName } from '../users/dto/update-user.dto';
+import { RoleTemplateName } from 'src/auth/roles.enum';
 
 @Controller('part-templates')
 @UseGuards(JwtAuthGuard, RolesGuard)

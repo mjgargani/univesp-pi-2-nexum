@@ -1,12 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString } from 'class-validator';
+import { RoleTemplateName } from 'src/auth/roles.enum';
 
-export enum RoleTemplateName {
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
-  CUSTOMER = 'CUSTOMER',
-}
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsArray()
   @IsOptional()
