@@ -32,18 +32,8 @@ export class SuppliersService {
       return await this.prisma.supplier.findMany({
         where: { active: true },
         include: {
-          contacts: {
-            where: { active: true },
-            include: {
-              contact: true,
-            },
-          },
-          addresses: {
-            where: { active: true },
-            include: {
-              address: true,
-            },
-          },
+          contacts: true,
+          addresses: true,
         },
       });
     } catch (cause) {
@@ -68,18 +58,8 @@ export class SuppliersService {
       return await this.prisma.supplier.findUnique({
         where: { id, active: true },
         include: {
-          contacts: {
-            where: { active: true },
-            include: {
-              contact: true,
-            },
-          },
-          addresses: {
-            where: { active: true },
-            include: {
-              address: true,
-            },
-          },
+          contacts: true,
+          addresses: true,
         },
       });
     } catch (cause) {
@@ -100,24 +80,26 @@ export class SuppliersService {
   }
 
   async create(dto: CreateSupplierDto): Promise<Supplier> {
-    let supplierId: string;
     try {
       const { contacts, addresses, ...supplierData } = dto;
 
-      await this.prisma.$transaction(async (tx) => {
-        const supplier = await tx.supplier.create({ data: supplierData });
-        supplierId = supplier.id;
-
-        if (contacts && contacts.length > 0) {
-          await this.contactsService.createManyForSupplier(supplier.id, contacts, tx);
-        }
-
-        if (addresses && addresses.length > 0) {
-          await this.addressesService.createManyForSupplier(supplier.id, addresses, tx);
-        }
+      const supplier = await this.prisma.supplier.create({
+        data: {
+          ...supplierData,
+          contacts: {
+            create: contacts,
+          },
+          addresses: {
+            create: addresses,
+          },
+        },
+        include: {
+          contacts: true,
+          addresses: true,
+        },
       });
 
-      return await this.findOne(supplierId);
+      return supplier;
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
         throw new UnauthorizedException('Acesso não autorizado.', { cause });
@@ -141,39 +123,35 @@ export class SuppliersService {
   }
 
   async update(id: string, dto: UpdateSupplierDto): Promise<Supplier> {
-    let supplierId: string;
     try {
       const { contacts, addresses, ...supplierData } = dto;
 
       const dataToUpdate: Prisma.SupplierUpdateInput = { ...supplierData };
 
-      await this.prisma.$transaction(async (tx) => {
-        const updatedSupplier = await tx.supplier.update({
-          where: { id, active: true },
-          data: dataToUpdate,
-        });
-        supplierId = updatedSupplier.id;
+      if (contacts) {
+        dataToUpdate.contacts = {
+          set: [],
+          create: contacts,
+        };
+      }
 
-        if (contacts !== undefined) {
-          await tx.supplierContact.deleteMany({
-            where: { supplierId: id },
-          });
-          if (contacts.length > 0) {
-            await this.contactsService.createManyForSupplier(id, contacts, tx);
-          }
-        }
+      if (addresses) {
+        dataToUpdate.addresses = {
+          set: [],
+          create: addresses,
+        };
+      }
 
-        if (addresses !== undefined) {
-          await tx.supplierAddress.deleteMany({
-            where: { supplierId: id },
-          });
-          if (addresses.length > 0) {
-            await this.addressesService.createManyForSupplier(id, addresses, tx);
-          }
-        }
+      const updatedSupplier = await this.prisma.supplier.update({
+        where: { id, active: true },
+        data: dataToUpdate,
+        include: {
+          contacts: true,
+          addresses: true,
+        },
       });
 
-      return await this.findOne(supplierId);
+      return updatedSupplier;
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
         throw new UnauthorizedException('Acesso não autorizado.', { cause });
@@ -201,40 +179,9 @@ export class SuppliersService {
 
   async activate(id: string): Promise<Supplier | null> {
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        await tx.supplierContact.updateMany({
-          where: { supplierId: id, active: false },
-          data: {
-            active: true,
-          },
-        });
-        await tx.supplierAddress.updateMany({
-          where: { supplierId: id, active: false },
-          data: {
-            active: true,
-          },
-        });
-
-        return await tx.supplier.update({
-          where: { id, active: false },
-          data: {
-            active: true,
-          },
-          include: {
-            contacts: {
-              where: { active: true },
-              include: {
-                contact: true,
-              },
-            },
-            addresses: {
-              where: { active: true },
-              include: {
-                address: true,
-              },
-            },
-          },
-        });
+      return await this.prisma.supplier.update({
+        where: { id, active: false },
+        data: { active: true },
       });
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
@@ -255,40 +202,9 @@ export class SuppliersService {
 
   async deactivate(id: string): Promise<Supplier | null> {
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        await tx.supplierContact.updateMany({
-          where: { supplierId: id, active: true },
-          data: {
-            active: false,
-          },
-        });
-        await tx.supplierAddress.updateMany({
-          where: { supplierId: id, active: true },
-          data: {
-            active: false,
-          },
-        });
-
-        return await tx.supplier.update({
-          where: { id, active: true },
-          data: {
-            active: false,
-          },
-          include: {
-            contacts: {
-              where: { active: false },
-              include: {
-                contact: true,
-              },
-            },
-            addresses: {
-              where: { active: false },
-              include: {
-                address: true,
-              },
-            },
-          },
-        });
+      return await this.prisma.supplier.update({
+        where: { id, active: true },
+        data: { active: false },
       });
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
