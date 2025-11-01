@@ -11,8 +11,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common/exceptions';
-import { RoleTemplateName, UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
+import { RoleTemplateName } from 'src/auth/roles.enum';
 
 /**
  * NOTE: Referências:
@@ -132,24 +133,9 @@ export class UsersService {
          */
         where: { active: true },
         include: {
-          roles: {
-            where: { active: true },
-            include: {
-              roleTemplate: true,
-            },
-          },
-          contacts: {
-            where: { active: true },
-            include: {
-              contact: true,
-            },
-          },
-          addresses: {
-            where: { active: true },
-            include: {
-              address: true,
-            },
-          },
+          roles: true, // Antes: { include: { roleTemplate: true } }
+          contacts: true, // Antes: { include: { contact: true } }
+          addresses: true, // Antes: { include: { address: true } }
         },
       });
     } catch (cause) {
@@ -204,24 +190,9 @@ export class UsersService {
       return await this.prisma.user.findUnique({
         where: { id, active: true },
         include: {
-          roles: {
-            where: { active: true },
-            include: {
-              roleTemplate: true,
-            },
-          },
-          contacts: {
-            where: { active: true },
-            include: {
-              contact: true,
-            },
-          },
-          addresses: {
-            where: { active: true },
-            include: {
-              address: true,
-            },
-          },
+          roles: true, // Antes: { include: { roleTemplate: true } }
+          contacts: true, // Antes: { include: { contact: true } }
+          addresses: true, // Antes: { include: { address: true } }
         },
       });
     } catch (cause) {
@@ -246,12 +217,7 @@ export class UsersService {
       return await this.prisma.user.findUnique({
         where: { userName, active: true },
         include: {
-          roles: {
-            where: { active: true },
-            include: {
-              roleTemplate: true,
-            },
-          },
+          roles: true, // Antes: { include: { roleTemplate: true } }
         },
       });
     } catch (cause) {
@@ -274,17 +240,17 @@ export class UsersService {
   // NOTE: Criar um novo usuário na entidade User, com hash de senha (utilizando a biblioteca
   // bcrypt [bQMfrj]) e criação de contatos e endereços. Retorna o usuário criado.
   async create(dto: CreateUserDto): Promise<User> {
-    // (DEPRECIADO em função de [1I7hWb]) let userId: string;
+    // let userId: string;
     try {
-      const { contacts: contactsData, addresses: addressesData, ...userData } = dto;
+      const { contacts, addresses, ...userData } = dto;
 
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(userData.password, salt);
 
       // (DEPRECIADO em função de [1I7hWb]) Uma '$transaction' (transação), é uma forma de
-      // garantir que múltiplas operações no banco de dados sejam executadas de forma 
-      // atômica. Ou seja, ou todas as operações são concluídas com sucesso, ou nenhuma 
-      // delas é aplicada, mantendo a integridade dos dados [Wb6m3Q], um erro aqui 
+      // garantir que múltiplas operações no banco de dados sejam executadas de forma
+      // atômica. Ou seja, ou todas as operações são concluídas com sucesso, ou nenhuma
+      // delas é aplicada, mantendo a integridade dos dados [Wb6m3Q], um erro aqui
       // implicará em "rollback" de todas as operações.
       // await this.prisma.$transaction(async (tx) => {
       //   const user = await tx.user.create({
@@ -318,49 +284,30 @@ export class UsersService {
       // em uma única operação atômica [1I7hWb], simplificando o código e melhorando
       // a performance. Lembrando que, há pelo menos um contato e um endereço
       // obrigatórios para criar um usuário (validações no DTO).
-      return await this.prisma.user.create({
+      // Não precisamos mais de transação explícita para esta lógica
+      const user = await this.prisma.user.create({
         data: {
           ...userData,
           password: hashedPassword,
+
           roles: {
-            create: {
-              roleTemplate: {
-                connect: {
-                  name: RoleTemplateName.CUSTOMER, // Assumindo que dto.roles sempre terá pelo menos um papel
-                },
-              },
-            },
+            connect: { name: RoleTemplateName.CUSTOMER }, // Conecta ao papel padrão
           },
           contacts: {
-            createMany: {
-              data: contactsData
-            },
+            create: contacts, // 'create' aceita o array de DTOs diretamente
           },
           addresses: {
-            createMany: addressesData?
+            create: addresses, // 'create' aceita o array de DTOs diretamente
           },
         },
         include: {
-          roles: {
-            where: { active: true },
-            include: {
-              roleTemplate: true,
-            },
-          },
-          contacts: {
-            where: { active: true },
-            include: {
-              contact: true,
-            },
-          },
-          addresses: {
-            where: { active: true },
-            include: {
-              address: true,
-            },
-          },
+          roles: true,
+          contacts: true,
+          addresses: true,
         },
       });
+
+      return user;
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
         throw new UnauthorizedException('Acesso não autorizado.', { cause });
@@ -386,13 +333,12 @@ export class UsersService {
   // NOTE: Atualizar um usuário existente na entidade User, com verificação de senha atual
   // para alteração de senha, além de atualizar contatos e endereços relacionados.
   async update(id: string, dto: UpdateUserDto): Promise<User> {
-    let userId: string;
     try {
       const { roles, contacts, addresses, ...userData } = dto;
 
       const dataToUpdate: Prisma.UserUpdateInput = { ...userData };
 
-      await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async (tx) => {
         if (userData.password && userData.newPassword) {
           // Compara a senha atual antes de atualizar
           const user = await tx.user.findUnique({ where: { id, active: true } });
@@ -407,53 +353,38 @@ export class UsersService {
           delete dataToUpdate.password;
         }
 
+        if (roles) {
+          dataToUpdate.roles = {
+            set: roles.map((roleName) => ({ name: roleName })),
+          };
+        }
+
+        if (contacts) {
+          dataToUpdate.contacts = {
+            set: [],
+            create: contacts,
+          };
+        }
+
+        if (addresses) {
+          dataToUpdate.addresses = {
+            set: [],
+            create: addresses,
+          };
+        }
+
         const updatedUser = await tx.user.update({
           where: { id, active: true },
           data: dataToUpdate,
+          include: {
+            roles: true,
+            contacts: true,
+            addresses: true,
+          },
         });
-        userId = updatedUser.id;
 
-        if (roles !== undefined) {
-          await tx.userRoleTemplate.deleteMany({
-            where: { userId: id },
-          });
-
-          if (roles.length > 0) {
-            for (const roleName of roles) {
-              const role = await tx.roleTemplate.findUniqueOrThrow({
-                where: { name: roleName },
-              });
-
-              await tx.userRoleTemplate.create({
-                data: {
-                  userId: id,
-                  roleTemplateId: role.id,
-                },
-              });
-            }
-          }
-        }
-
-        if (contacts !== undefined) {
-          await tx.userContact.deleteMany({
-            where: { userId: id },
-          });
-          if (contacts.length > 0) {
-            await this.contactsService.createManyForUser(id, contacts, tx);
-          }
-        }
-
-        if (addresses !== undefined) {
-          await tx.userAddress.deleteMany({
-            where: { userId: id },
-          });
-          if (addresses.length > 0) {
-            await this.addressesService.createManyForUser(id, addresses, tx);
-          }
-        }
+        return updatedUser;
       });
-
-      return await this.findOne(userId);
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
         throw new UnauthorizedException('Acesso não autorizado.', { cause });
@@ -479,56 +410,12 @@ export class UsersService {
     }
   }
 
-  // NOTE: Ativar um usuário e seus relacionamentos (papéis, contatos, endereços)
-  // Benefício de utilizar a técnica de "Soft Delete"
+  // NOTE: Ativar um usuário (Benefício de utilizar a técnica de "Soft Delete")
   async activate(id: string): Promise<User | null> {
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        await tx.userRoleTemplate.updateMany({
-          where: { userId: id, active: false },
-          data: {
-            active: true,
-          },
-        });
-        await tx.userContact.updateMany({
-          where: { userId: id, active: false },
-          data: {
-            active: true,
-          },
-        });
-        await tx.userAddress.updateMany({
-          where: { userId: id, active: false },
-          data: {
-            active: true,
-          },
-        });
-
-        return await tx.user.update({
-          where: { id, active: false },
-          data: {
-            active: true,
-          },
-          include: {
-            roles: {
-              where: { active: true },
-              include: {
-                roleTemplate: true,
-              },
-            },
-            contacts: {
-              where: { active: true },
-              include: {
-                contact: true,
-              },
-            },
-            addresses: {
-              where: { active: true },
-              include: {
-                address: true,
-              },
-            },
-          },
-        });
+      return await this.prisma.user.update({
+        where: { id, active: false },
+        data: { active: true },
       });
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
@@ -547,49 +434,12 @@ export class UsersService {
     }
   }
 
-  // NOTE: Desativar um usuário e seus relacionamentos (papéis, contatos, endereços)
-  // Executa o chamado "Soft Delete"
+  // NOTE: Desativar um usuário (Benefício de utilizar a técnica de "Soft Delete")
   async deactivate(id: string): Promise<User | null> {
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        await tx.userRoleTemplate.updateMany({
-          where: { userId: id, active: true },
-          data: {
-            active: false,
-          },
-        });
-        await tx.userContact.updateMany({
-          where: { userId: id, active: true },
-          data: {
-            active: false,
-          },
-        });
-        await tx.userAddress.updateMany({
-          where: { userId: id, active: true },
-          data: {
-            active: false,
-          },
-        });
-        return await tx.user.update({
-          where: { id, active: true },
-          data: {
-            active: false,
-          },
-          include: {
-            roles: {
-              where: { active: false },
-              include: { roleTemplate: true },
-            },
-            contacts: {
-              where: { active: false },
-              include: { contact: true },
-            },
-            addresses: {
-              where: { active: false },
-              include: { address: true },
-            },
-          },
-        });
+      return await this.prisma.user.update({
+        where: { id, active: true },
+        data: { active: false },
       });
     } catch (cause) {
       if (cause instanceof UnauthorizedException) {
@@ -609,8 +459,6 @@ export class UsersService {
   }
 
   // NOTE: Deletar um usuário permanentemente da entidade User
-  // incluindo verificação para garantir que todos os relacionamentos
-  // (contatos e endereços) foram removidos corretamente
   // Usar com cautela, pois se trata do chamado "Hard Delete"
   async remove(id: string): Promise<User> {
     try {
