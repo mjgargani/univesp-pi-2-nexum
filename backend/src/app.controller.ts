@@ -10,7 +10,6 @@ export class AppController {
     return this.appService.getHello();
   }
 
-
   // endpoint de verificação de saúde da API
   @Get('health')
   getHealth() {

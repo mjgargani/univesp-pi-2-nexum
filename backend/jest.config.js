@@ -8,4 +8,8 @@ module.exports = {
     '!src/**/*.dto.ts',
     '!src/main.ts',
   ],
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/src/$1',
+    '^generated/(.*)$': '<rootDir>/generated/$1'
+  }
 };

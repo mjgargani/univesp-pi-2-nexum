@@ -33,7 +33,7 @@ nexum/
 - NestJS framework
 - TypeScript
 - RESTful API design
-- Kysely (Query Builder and Migrations)
+- Prisma ORM
 
 **DevOps:**
 - Dockerfile (All-in-one) _It is not best practice, but rather an experiment._
