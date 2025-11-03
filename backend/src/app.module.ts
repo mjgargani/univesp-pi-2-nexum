@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { ContactsModule } from './entities/contacts/contacts.module';
-import { AddressesModule } from './entities/addresses/addresses.module';
 import { UsersModule } from './entities/users/users.module';
 import { SuppliersModule } from './entities/suppliers/suppliers.module';
 import { PartTemplatesModule } from './entities/part-templates/part-templates.module';
@@ -17,8 +15,6 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     PrismaModule,
-    ContactsModule,
-    AddressesModule,
     UsersModule,
     SuppliersModule,
     PartTemplatesModule,

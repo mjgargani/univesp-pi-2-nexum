@@ -64,7 +64,6 @@ model Manufacturer {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   name        String
-  description String
   complement  String?
 
   vehicles    VehicleTemplate[] // Relação 1:N com VehicleTemplate
@@ -131,7 +130,6 @@ model ServiceStep {
   updatedAt           DateTime @updatedAt @map("updated_at")
   stepNumber          Int @map("step_number")
   name                String
-  description         String
   complement          String?
 
   // Relação N:1 com ServiceTemplate
@@ -145,7 +143,7 @@ model OrderStatus {
   id          String    @id @default(uuid())
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  description String
+  name        String
   complement  String?
 
   // Relação N:1 com Order

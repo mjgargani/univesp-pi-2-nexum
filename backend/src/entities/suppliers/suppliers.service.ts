@@ -1,17 +1,10 @@
-import {
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContactsService } from '../contacts/contacts.service';
-import { AddressesService } from '../addresses/addresses.service';
 import { Prisma, Supplier } from 'generated/client';
-import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { Crud, Entity, Subject } from '../crud.enum';
 
 /**
  * Dado que a entidade Supplier segue a mesma linha de raciocínio da entidade User,
@@ -21,11 +14,7 @@ import { UpdateSupplierDto } from './dto/update-supplier.dto';
  */
 @Injectable()
 export class SuppliersService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly contactsService: ContactsService,
-    private readonly addressesService: AddressesService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Supplier[]> {
     try {
@@ -37,19 +26,7 @@ export class SuppliersService {
         },
       });
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException('Fornecedores não encontrados.', { cause });
-        }
-      }
-
-      throw new InternalServerErrorException('Falha ao buscar fornecedores.', {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.READ, sub: Subject.ALL });
     }
   }
 
@@ -63,19 +40,7 @@ export class SuppliersService {
         },
       });
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException(`Fornecedor '${id}' não encontrado.`, { cause });
-        }
-      }
-
-      throw new InternalServerErrorException(`Falha ao buscar o fornecedor '${id}'.`, {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.READ, sub: id });
     }
   }
 
@@ -101,23 +66,11 @@ export class SuppliersService {
 
       return supplier;
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
-          throw new ConflictException(`Fornecedor '${dto.companyName}' já existe.`, { cause });
-        }
-        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
-          throw new ConflictException(`Fornecedor '${dto.companyName}' possui dados obrigatórios não preenchidos.`, {
-            cause,
-          });
-        }
-      }
-
-      throw new InternalServerErrorException('Falha ao criar o fornecedor.', {
-        cause,
+      serviceErrorHandler(cause, {
+        entity: Entity.SUPPLIER,
+        method: Crud.CREATE,
+        sub: dto.companyName || Subject.UNDEFINED,
+        data: dto,
       });
     }
   }
@@ -153,27 +106,7 @@ export class SuppliersService {
 
       return updatedSupplier;
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException(`Fornecedor '${id}' não encontrado.`, { cause });
-        }
-        if (cause.code === PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED) {
-          throw new ConflictException(`Fornecedor com dados fornecidos já existe.`, { cause });
-        }
-        if (cause.code === PrismaErrorCodes.NOT_NULL_VIOLATION) {
-          throw new ConflictException(`Fornecedor '${id}' possui dados obrigatórios não preenchidos.`, {
-            cause,
-          });
-        }
-      }
-
-      throw new InternalServerErrorException(`Falha ao atualizar o fornecedor '${id}'.`, {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.UPDATE, sub: id, data: dto });
     }
   }
 
@@ -184,19 +117,7 @@ export class SuppliersService {
         data: { active: true },
       });
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException(`Fornecedor '${id}' não encontrado.`, { cause });
-        }
-      }
-
-      throw new InternalServerErrorException(`Falha ao ativar o fornecedor '${id}'.`, {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.UPDATE, sub: id });
     }
   }
 
@@ -207,19 +128,7 @@ export class SuppliersService {
         data: { active: false },
       });
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException(`Fornecedor '${id}' não encontrado.`, { cause });
-        }
-      }
-
-      throw new InternalServerErrorException(`Falha ao desativar o fornecedor '${id}'.`, {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.UPDATE, sub: id });
     }
   }
 
@@ -229,19 +138,7 @@ export class SuppliersService {
         where: { id },
       });
     } catch (cause) {
-      if (cause instanceof UnauthorizedException) {
-        throw new UnauthorizedException('Acesso não autorizado.', { cause });
-      }
-
-      if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-        if (cause.code === PrismaErrorCodes.RECORD_NOT_FOUND) {
-          throw new NotFoundException(`Fornecedor '${id}' não encontrado.`, { cause });
-        }
-      }
-
-      throw new InternalServerErrorException(`Falha ao deletar o fornecedor '${id}'.`, {
-        cause,
-      });
+      serviceErrorHandler(cause, { entity: Entity.SUPPLIER, method: Crud.DELETE, sub: id });
     }
   }
 }
