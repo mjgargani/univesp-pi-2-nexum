@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateManufacturerDto } from './dto/create-manufacturer.dto';
 import { UpdateManufacturerDto } from './dto/update-manufacturer.dto';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 
 @Injectable()

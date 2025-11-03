@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from 'generated/client';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RoleTemplateName } from 'src/auth/roles.enum';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { RoleTemplateName } from '../../auth/roles.enum';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 
 /**

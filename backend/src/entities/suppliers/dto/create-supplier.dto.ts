@@ -9,8 +9,8 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CreateAddressDto } from 'src/entities/addresses/dto/create-address.dto';
-import { CreateContactDto } from 'src/entities/contacts/dto/create-contact.dto';
+import { CreateAddressDto } from '../../addresses/dto/create-address.dto';
+import { CreateContactDto } from '../../contacts/dto/create-contact.dto';
 
 export class CreateSupplierDto {
   @IsString()

@@ -9,7 +9,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CreateServiceStepDto } from 'src/entities/service-steps/dto/create-service-step.dto';
+import { CreateServiceStepDto } from '../../../entities/service-steps/dto/create-service-step.dto';
 
 export class CreateServiceTemplateDto {
   @IsString()
@@ -27,7 +27,7 @@ export class CreateServiceTemplateDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateServiceStepDto)
-  @ArrayMinSize(3) // Pelo menos três etapas possíveis ("Agendado", "Em andamento", "Concluído")
-  @ArrayMaxSize(30) // Limite arbitrário para evitar excesso de etapas
+  @ArrayMinSize(4) // Pelo menos três etapas possíveis ("Agendado", "Em andamento", "Concluído", "Cancelado")
+  @ArrayMaxSize(10) // Limite arbitrário para evitar excesso de etapas
   steps: CreateServiceStepDto[];
 }

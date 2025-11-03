@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'generated/client';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePartTemplateDto } from './dto/create-part-template.dto';
 import { UpdatePartTemplateDto } from './dto/update-part-template.dto';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class PartTemplatesService {
 
   async create(dto: CreatePartTemplateDto) {
     try {
-      const { supplierIds, ...partTemplateData } = dto;
+      const { supplierIds, serviceTemplateIds, ...partTemplateData } = dto;
 
       const partTemplate = await this.prisma.partTemplate.create({
         data: {
@@ -40,9 +40,21 @@ export class PartTemplatesService {
           suppliers: {
             connect: supplierIds.map((supplierId) => ({ id: supplierId })),
           },
+          serviceTemplates: {
+            // Use 'create' para gerar as novas entradas na tabela de junção
+            create: serviceTemplateIds.map((serviceTemplateId) => ({
+              // Para cada entrada na tabela de junção, conecte o 'serviceTemplate'
+              serviceTemplate: {
+                connect: { id: serviceTemplateId },
+              },
+              // O 'partTemplate' (este que estamos criando) 
+              // é conectado automaticamente pelo Prisma.
+            })),
+          },
         },
         include: {
           suppliers: true,
+          serviceTemplates: true,
         },
       });
 

@@ -19,4 +19,11 @@ export class CreatePartTemplateDto {
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   supplierIds: string[];
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  serviceTemplateIds: string[];
 }

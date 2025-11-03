@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { PrismaService } from '../../prisma/prisma.service';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 import { CreateVehicleTemplateDto } from './dto/create-vehicle-template.dto';
 import { UpdateVehicleTemplateDto } from './dto/update-vehicle-template.dto';

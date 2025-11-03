@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { PrismaService } from '../../prisma/prisma.service';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 import { UpdateOrderDto } from './dto/update-order.dto';
 
@@ -16,8 +16,8 @@ export class OrdersService {
         include: {
           services: {
             include: {
-              parts: true,
               steps: true,
+              partTemplates: true,
             },
           },
           statuses: true,
@@ -36,8 +36,8 @@ export class OrdersService {
         include: {
           services: {
             include: {
-              parts: true,
               steps: true,
+              partTemplates: true,
             },
           },
           statuses: true,
@@ -61,12 +61,12 @@ export class OrdersService {
           const serviceTemplate = await tx.serviceTemplate.findUnique({
             where: { id: serviceTemplateId },
             include: {
-              parts: true,
               steps: true,
+              partTemplates: true,
             },
           });
           if (serviceTemplate) {
-            budget += serviceTemplate.value + serviceTemplate.parts.reduce((acc, part) => acc + part.value, 0);
+            budget += 0;
             conclusion = new Date(
               conclusion.getTime() +
                 serviceTemplate.steps.reduce((acc, step) => acc + (step.estimatedDuration || 0), 0) * 60000,
@@ -115,8 +115,8 @@ export class OrdersService {
           include: {
             services: {
               include: {
-                parts: true,
                 steps: true,
+                partTemplates: true,
               },
             },
             statuses: true,
@@ -194,8 +194,8 @@ export class OrdersService {
           include: {
             services: {
               include: {
-                parts: true,
                 steps: true,
+                partTemplates: true,
               },
             },
             statuses: true,

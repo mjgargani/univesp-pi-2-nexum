@@ -4,9 +4,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma } from 'generated/client';
-import { Crud, Entity } from 'src/entities/crud.enum';
-import { PrismaErrorCodes } from 'src/prisma/errorCodes.enum';
+import { Prisma } from '../../generated/client';
+import { Crud, Entity } from '../entities/crud.enum';
+import { PrismaErrorCodes } from '../prisma/errorCodes.enum';
 
 interface ErrorContext {
   entity: Entity;

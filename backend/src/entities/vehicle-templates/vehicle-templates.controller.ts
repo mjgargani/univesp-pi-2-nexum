@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { VehicleTemplatesService } from './vehicle-templates.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { RoleTemplateName } from 'src/auth/roles.enum';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { RoleTemplateName } from '../../auth/roles.enum';
 import { CreateVehicleTemplateDto } from './dto/create-vehicle-template.dto';
 import { UpdateVehicleTemplateDto } from './dto/update-vehicle-template.dto';
 

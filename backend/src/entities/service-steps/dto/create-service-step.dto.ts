@@ -9,6 +9,10 @@ export class CreateServiceStepDto {
   @IsNotEmpty()
   name: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  estimatedDuration: number;
+
   @IsString()
   @IsOptional()
   complement?: string;

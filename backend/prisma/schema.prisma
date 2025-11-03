@@ -45,7 +45,7 @@ model Supplier {
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
-  companyName   String    @map("company_name")
+  companyName   String    @unique @map("company_name")
   document      String    @unique
   complement    String?
 
@@ -63,7 +63,7 @@ model Manufacturer {
   active      Boolean   @default(true)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  name        String
+  name        String    @unique
   complement  String?
 
   vehicles    VehicleTemplate[] // Relação 1:N com VehicleTemplate
@@ -178,13 +178,11 @@ model PartTemplate {
   id          String    @id @default(uuid())
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  name        String
+  name        String    @unique
   value       Float
   complement  String?
 
-  // Relação N:1 com ServiceTemplate
-  serviceTemplateId   String  @map("service_template_id")
-  serviceTemplate     ServiceTemplate   @relation(fields: [serviceTemplateId], references: [id])
+  serviceTemplates PartTemplateServiceTemplate[] // Relação M:N com ServiceTemplate via tabela de junção
 
   suppliers   Supplier[] // Relação M:N com Supplier
 
@@ -196,12 +194,12 @@ model ServiceTemplate {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   value       Float
-  name        String
+  name        String    @unique
   complement  String?
 
   steps       ServiceStep[]     // Relação 1:N com ServiceStep
 
-  parts       PartTemplate[]    // Relação 1:N com PartTemplate
+  partTemplates       PartTemplateServiceTemplate[]    // Relação M:N com PartTemplate via tabela de junção
 
   orders      Order[]           // Relação M:N com Order
 
@@ -212,7 +210,7 @@ model VehicleTemplate {
   id              String        @id @default(uuid())
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
-  name            String
+  name            String        @unique
   complement      String?
 
   users           UserVehicleTemplate[] // Relação 1:N com UserVehicleTemplate
@@ -273,125 +271,18 @@ model UserVehicleTemplate {
   @@map("users_vehicle_templates")
 }
 
-// -- Trecho de código removido/comentado para simplificação do schema utilizando junções implícitas [HjfHUG] --
+// Relacionamento explícito entre PartTemplate e ServiceTemplate (tabela de junção para relação M:N)
 
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model OrderServiceTemplate {
-//   id                  String   @id @default(uuid())
-//   active              Boolean  @default(true)
-//   createdAt           DateTime @default(now()) @map("created_at")
-//   updatedAt           DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com Order
-//   orderId             String  @map("order_id")
-//   order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com ServiceTemplate
-//   serviceTemplateId   String  @map("service_template_id")
-//   serviceTemplate     ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+model PartTemplateServiceTemplate {
+  complement        String?
+  
+  partTemplateId    String  @map("part_template_id")
+  partTemplate      PartTemplate    @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  
+  serviceTemplateId String  @map("service_template_id")
+  serviceTemplate   ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-//   @@map("order_service_templates")
-// }
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model OrderPartTemplate {
-//   id               String   @id @default(uuid())
-//   active           Boolean  @default(true)
-//   createdAt        DateTime @default(now()) @map("created_at")
-//   updatedAt        DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com Order
-//   orderId           String  @map("order_id")
-//   order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com PartTemplate
-//   partTemplateId    String  @map("part_template_id")
-//   partTemplate      PartTemplate @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("order_part_templates")
-// }
 
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model UserContact {
-//   id         String   @id @default(uuid())
-//   active     Boolean  @default(true)
-//   createdAt  DateTime @default(now()) @map("created_at")
-//   updatedAt  DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com User
-//   userId    String  @map("user_id")
-//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com Contact
-//   contactId String  @map("contact_id")
-//   contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("users_contacts")
-// }
-
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model UserAddress {
-//   id         String   @id @default(uuid())
-//   active     Boolean  @default(true)
-//   createdAt  DateTime @default(now()) @map("created_at")
-//   updatedAt  DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com User
-//   userId    String  @map("user_id")
-//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com Address
-//   addressId String  @map("address_id")
-//   address   Address  @relation(fields: [addressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("users_addresses")
-// }
-
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model SupplierContact {
-//   id            String   @id @default(uuid())
-//   active        Boolean  @default(true)
-//   createdAt     DateTime @default(now()) @map("created_at")
-//   updatedAt     DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com Supplier
-//   supplierId    String @map("supplier_id")
-//   supplier      Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com Contact
-//   contactId     String @map("contact_id")
-//   contact       Contact @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("suppliers_contacts")
-// }
-
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model SupplierAddress {
-//   id          String   @id @default(uuid())
-//   active      Boolean  @default(true)
-//   createdAt   DateTime @default(now()) @map("created_at")
-//   updatedAt   DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com Supplier
-//   supplierId String @map("supplier_id")
-//   supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com Address
-//   addressId  String @map("address_id")
-//   address    Address @relation(fields: [addressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("suppliers_addresses")
-// }
-
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model PartTemplateSupplier {
-//   id               String   @id @default(uuid())
-//   active           Boolean  @default(true)
-//   createdAt        DateTime @default(now()) @map("created_at")
-//   updatedAt        DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com PartTemplate
-//   partTemplateId  String @map("part_template_id")
-//   partTemplate    PartTemplate @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // Relação 1:N com Supplier
-//   supplierId      String @map("supplier_id")
-//   supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   @@map("part_templates_suppliers")
-// }
-
-// (DEPRECIADO em detrimento de [HjfHUG])
-// model UserRoleTemplate {
-//   active           Boolean  @default(true)
-//   createdAt        DateTime @default(now()) @map("created_at")
-//   updatedAt        DateTime @updatedAt @map("updated_at")
-//   // Relação 1:N com User
-//   userId String @map("user_id")
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade) // Deleta/Altera a relação se o usuário for deletado
-//   // Relação 1:N com RoleTemplate
-//   roleTemplateId String @map("role_template_id")
-//   roleTemplate RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade) // Deleta/Altera a relação se o papel for deletado
-//   // Chave primária composta (garante que um usuário não pode ter o mesmo papel duas vezes)
-//   @@id([userId, roleTemplateId])
-//   @@map("users_role_templates")
-// }
+  @@id([partTemplateId, serviceTemplateId])
+  @@map("part_template_service_template")
+}

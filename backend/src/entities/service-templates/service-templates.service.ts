@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'generated/client';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { serviceErrorHandler } from 'src/utils/serviceErrors';
+import { PrismaService } from '../../prisma/prisma.service';
+import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 import { CreateServiceTemplateDto } from './dto/create-service-template.dto';
 import { UpdateServiceTemplateDto } from './dto/update-service-template.dto';
@@ -42,7 +42,28 @@ export class ServiceTemplatesService {
         data: {
           ...templateData,
           steps: {
-            create: steps,
+            create: [
+              {
+                stepNumber: 1,
+                name: 'Agendado',
+                estimatedDuration: 0,
+              },
+              {
+                stepNumber: 2,
+                name: 'Em andamento',
+                estimatedDuration: 0,
+              },
+              {
+                stepNumber: 3,
+                name: 'Concluído',
+                estimatedDuration: 0,
+              },
+              {
+                stepNumber: 4,
+                name: 'Cancelado',
+                estimatedDuration: 0,
+              },
+            ],
           },
         },
         include: {

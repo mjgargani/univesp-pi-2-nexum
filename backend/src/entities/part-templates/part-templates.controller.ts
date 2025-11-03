@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PartTemplatesService } from './part-templates.service';
 import { CreatePartTemplateDto } from './dto/create-part-template.dto';
 import { UpdatePartTemplateDto } from './dto/update-part-template.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { RoleTemplateName } from 'src/auth/roles.enum';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { RoleTemplateName } from '../../auth/roles.enum';
 
 @Controller('part-templates')
 @UseGuards(JwtAuthGuard, RolesGuard)
