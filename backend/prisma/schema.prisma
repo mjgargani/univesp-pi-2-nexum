@@ -129,6 +129,7 @@ model ServiceStep {
   updatedAt           DateTime @updatedAt @map("updated_at")
   stepNumber          Int @map("step_number")
   name                String
+  estimatedDuration   Int @map("estimated_duration") // em minutos
   complement          String?
 
   // Relação N:1 com ServiceTemplate
@@ -181,7 +182,9 @@ model PartTemplate {
   value       Float
   complement  String?
 
-  orders      Order[] // Relação M:N com Order
+  // Relação N:1 com ServiceTemplate
+  serviceTemplateId   String  @map("service_template_id")
+  serviceTemplate     ServiceTemplate   @relation(fields: [serviceTemplateId], references: [id])
 
   suppliers   Supplier[] // Relação M:N com Supplier
 
@@ -196,9 +199,11 @@ model ServiceTemplate {
   name        String
   complement  String?
 
-  steps       ServiceStep[] // Relação 1:N com ServiceStep
+  steps       ServiceStep[]     // Relação 1:N com ServiceStep
 
-  orders      Order[] // Relação M:N com Order
+  parts       PartTemplate[]    // Relação 1:N com PartTemplate
+
+  orders      Order[]           // Relação M:N com Order
 
   @@map("service_templates")
 }
@@ -236,8 +241,6 @@ model Order {
   statuses        OrderStatus[]               // Relação 1:N com OrderStatus
 
   services        ServiceTemplate[]           // Relação 1:N com ServiceTemplate
-
-  parts           PartTemplate[]              // Relação 1:N com OrderPartTemplate
 
   // Relação N:1 com a INSTÂNCIA do veículo do usuário
   userVehicleTemplateId   String @map("user_vehicle_template_id")

@@ -18,4 +18,5 @@ export enum Entity {
 export enum Subject {
   ALL = 'Todos',
   UNDEFINED = 'Indefinido',
+  NEW = 'Novo',
 }
