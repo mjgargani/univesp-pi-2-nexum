@@ -13,7 +13,6 @@ export enum Entity {
   TEMPLATE_PART = 'Peças',
   TEMPLATE_VEHICLE = 'Veículos',
   TEMPLATE_SERVICE = 'Serviços',
-  SERVICE_STEPS = 'Etapas de Serviço',
 }
 
 export enum Subject {

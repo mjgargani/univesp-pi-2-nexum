@@ -125,7 +125,6 @@ model OrderCounter {
 }
 
 model ServiceStep {
-  id                  String  @id @default(uuid())
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
   stepNumber          Int @map("step_number")
@@ -136,6 +135,8 @@ model ServiceStep {
   serviceTemplateId   String  @map("service_template_id")
   serviceTemplate     ServiceTemplate   @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // Chave primária composta
+  @@id([serviceTemplateId, stepNumber])
   @@map("service_steps")
 }
 
@@ -193,7 +194,6 @@ model ServiceTemplate {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   value       Float
   name        String
-  description String
   complement  String?
 
   steps       ServiceStep[] // Relação 1:N com ServiceStep
