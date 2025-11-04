@@ -10,6 +10,6 @@ export class CreateVehicleTemplateDto {
   complement?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   manufacturerId: string;
 }

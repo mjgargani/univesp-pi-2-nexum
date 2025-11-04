@@ -12,8 +12,21 @@ export class VehicleTemplatesService {
   async findAll() {
     try {
       return this.prisma.vehicleTemplate.findMany({
-        include: {
-          manufacturer: true,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          manufacturer: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
         },
       });
     } catch (cause) {
@@ -25,8 +38,21 @@ export class VehicleTemplatesService {
     try {
       return this.prisma.vehicleTemplate.findUnique({
         where: { id },
-        include: {
-          manufacturer: true,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          manufacturer: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
         },
       });
     } catch (cause) {
@@ -44,8 +70,21 @@ export class VehicleTemplatesService {
             connect: { id: manufacturerId },
           },
         },
-        include: {
-          manufacturer: true,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          manufacturer: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
         },
       });
     } catch (cause) {
@@ -69,8 +108,21 @@ export class VehicleTemplatesService {
             connect: { id: manufacturerId },
           },
         },
-        include: {
-          manufacturer: true,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          manufacturer: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
         },
       });
     } catch (cause) {
@@ -80,7 +132,25 @@ export class VehicleTemplatesService {
 
   async remove(id: string) {
     try {
-      return this.prisma.vehicleTemplate.delete({ where: { id } });
+      return this.prisma.vehicleTemplate.delete({
+        where: { id },
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          manufacturer: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
+        },
+      });
     } catch (cause) {
       serviceErrorHandler(cause, { entity: Entity.TEMPLATE_VEHICLE, method: Crud.DELETE, sub: id });
     }
