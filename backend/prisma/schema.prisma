@@ -217,7 +217,7 @@ model VehicleTemplate {
 
   // Relação N:1 com Manufacturer
   manufacturerId  String        @map("manufacturer_id")
-  manufacturer    Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  manufacturer    Manufacturer @relation(fields: [manufacturerId], references: [id])
   
   @@map("vehicle_templates")
 }
