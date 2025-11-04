@@ -30,8 +30,11 @@ export class ApiService {
     }
   }
 
-  static async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint);
+  static async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'GET',
+    });
   }
 
   static async post<T>(endpoint: string, data: any): Promise<T> {

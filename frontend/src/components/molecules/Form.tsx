@@ -67,7 +67,7 @@ import { useEffect, useState } from "react";
 //   ]
 // }
 // ```
-export default function Form({ formData }: { formData: any }) {
+export default function Form({ formData, onSubmit }: { formData: any, onSubmit: (data: any) => void }) {
   const [formHeader, setFormHeader] = useState<any>(null);
   const [formComposition, setFormComposition] = useState<any>(null);
 
@@ -96,7 +96,6 @@ export default function Form({ formData }: { formData: any }) {
     }
 
     const newFormDataState = orderFormData(formData.form);
-    console.log(newFormDataState)
     setFormComposition(newFormDataState);
   }, [formData]);
 
@@ -105,7 +104,7 @@ export default function Form({ formData }: { formData: any }) {
   return (
     <div className="flex bg-[var(--fg)] rounded-lg overflow-hidden w-full p-4">
       { (formHeader && formComposition) && (
-        <form action={formHeader.action?.href} method={formHeader.action?.method || "GET"} className="flex flex-col flex-grow w-full">
+        <form action={formHeader.action?.href} method={formHeader.action?.method || "GET"} className="flex flex-col flex-grow w-full" onSubmit={onSubmit}>
           {formComposition.map((rowItem, i) => {
             return (
               <div className="flex flex-wrap justify-center gap-4 w-full">
@@ -113,38 +112,38 @@ export default function Form({ formData }: { formData: any }) {
                   rowItem.row.map((colItem, i) => (
                     <div key={i} className="flex flex-wrap flex-1 mb-4">
                       {
-                        colItem.col.map((field: any, j: number) => {
-                          if (field.type === "button") {
-                            return (
-                              <button
-                                key={j}
-                                name={field.name}
-                                type={field.submit ? "submit" : "button"}
-                                disabled={field.disabled || false}
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                              >
-                                {field.label || "Button"}
-                              </button>
-                            );
-                          } else {
-                            return (
-                              <div key={j} className="mb-2">
-                                {field.label && (
-                                  <label htmlFor={field.name} className="block text-[var(--text)] text-sm font-bold mb-2">
-                                    {field.label}
-                                  </label>
-                                )}
-                                <input
-                                  id={field.name}
+                        colItem.col.map((field: any, j: number) => (
+                          <div className="flex flex-grow">
+                            { 
+                              field.type === "button" ? (
+                                <button
+                                  key={j}
                                   name={field.name}
-                                  type={field.type || "text"}
-                                  required={field.required || false}
-                                  className="shadow appearance-none border rounded w-full py-2 px-3 text-[var(--text)] leading-tight focus:outline-none focus:shadow-outline bg-[var(--bg)]"
-                                />
-                              </div>
-                            );
-                          }
-                        })
+                                  type={field.submit ? "submit" : "button"}
+                                  disabled={field.disabled || false}
+                                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex-1"
+                                >
+                                  {field.label || "Button"}
+                                </button>
+                              ) : (
+                                <div key={j} className="flex flex-col flex-grow mr-4">
+                                  {field.label && (
+                                    <label htmlFor={field.name} className="block text-[var(--text)] text-xs font-bold mb-2 flex-grow">
+                                      {field.label}
+                                    </label>
+                                  )}
+                                  <input
+                                    id={field.name}
+                                    name={field.name}
+                                    type={field.type || "text"}
+                                    required={field.required || false}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-[var(--text)] leading-tight focus:outline-none focus:shadow-outline bg-[var(--bg)] flex-grow"
+                                  />
+                                </div>
+                              )
+                            }
+                          </div>
+                        ))
                       }
                     </div>
                   ))
