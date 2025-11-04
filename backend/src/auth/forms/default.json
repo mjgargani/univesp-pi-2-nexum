@@ -5,11 +5,13 @@
     "rel": "login",
     "method": "POST"
   },
-  "grid": [
+  "form": [
     {
-      "row-1": [
+      "order": 1,
+      "row": [
         {
-          "col-1": [
+          "order": 1,
+          "col": [
             {
               "name": "userName",
               "type": "text",
@@ -19,7 +21,8 @@
           ]
         },
         {
-          "col-2": [
+          "order": 2,
+          "col": [
             {
               "name": "password",
               "type": "password",
@@ -31,9 +34,11 @@
       ]
     },
     {
-      "row-2": [
+      "order": 2,
+      "row": [
         {
-          "col-1": [
+          "order": 1,
+          "col": [
             {
               "name": "submitLoginBtn",
               "type": "button",
@@ -43,7 +48,8 @@
           ]
         },
         {
-          "col-2": [
+          "order": 2,
+          "col": [
             {
               "name": "forgotPasswordBtn",
               "type": "button",

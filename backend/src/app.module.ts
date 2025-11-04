@@ -10,6 +10,7 @@ import { VehicleTemplatesModule } from './entities/vehicle-templates/vehicle-tem
 import { ServiceTemplatesModule } from './entities/service-templates/service-templates.module';
 import { OrdersModule } from './entities/orders/orders.module';
 import { AuthModule } from './auth/auth.module';
+import { PostsModule } from './entities/posts/posts.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './auth/auth.module';
     ServiceTemplatesModule,
     OrdersModule,
     AuthModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

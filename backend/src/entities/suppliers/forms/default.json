@@ -5,7 +5,7 @@
     "rel": "supplier",
     "method": "POST"
   },
-  "grid": [
+  "flex": [
     {
       "row-1": [
         {
