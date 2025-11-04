@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../entities/users/users.service';
+import { RoleTemplateName } from '../roles.enum';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; username: string; roles: string[] }) {
+  async validate(payload: { sub: string; username: string; roles: RoleTemplateName[] }) {
     const user = await this.usersService.findOne(payload.sub);
 
     if (!user || !user.active) {

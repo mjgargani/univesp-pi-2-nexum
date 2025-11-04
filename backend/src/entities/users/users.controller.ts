@@ -14,7 +14,7 @@ export class UsersController {
 
   @Get()
   @Roles(RoleTemplateName.ADMIN)
-  async findAll() {
+  async findAll(@Request() req) {
     return this.UsersService.findAll();
   }
 
