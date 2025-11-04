@@ -6,11 +6,20 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { RoleTemplateName } from '../../auth/roles.enum';
+import formTemplate from './forms/default.json';
 
+type SupplierFormType = typeof formTemplate;
+const supplierForm: SupplierFormType = formTemplate;
 @Controller('suppliers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SuppliersController {
   constructor(private readonly SuppliersService: SuppliersService) {}
+
+  @Get('form')
+  @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER)
+  async getForm() {
+    return supplierForm;
+  }
 
   @Get()
   @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER)

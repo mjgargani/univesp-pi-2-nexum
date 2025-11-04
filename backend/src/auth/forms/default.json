@@ -1,0 +1,58 @@
+{
+  "title": "Formulário de Login",
+  "action": {
+    "href": "/auth/login",
+    "rel": "login",
+    "method": "POST"
+  },
+  "grid": [
+    {
+      "row-1": [
+        {
+          "col-1": [
+            {
+              "name": "userName",
+              "type": "text",
+              "label": "Insira seu nome de Usuário",
+              "required": true
+            }
+          ]
+        },
+        {
+          "col-2": [
+            {
+              "name": "password",
+              "type": "password",
+              "label": "Insira sua senha",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row-2": [
+        {
+          "col-1": [
+            {
+              "name": "submitLoginBtn",
+              "type": "button",
+              "label": "Entrar",
+              "submit": true
+            }
+          ]
+        },
+        {
+          "col-2": [
+            {
+              "name": "forgotPasswordBtn",
+              "type": "button",
+              "label": "Esqueceu sua senha?",
+              "disabled": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
