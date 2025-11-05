@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleTemplateName } from '../../auth/roles.enum';
 import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
+import { MenuService } from '../menu/menu.service';
 
 /**
  * NOTE: Referências:
@@ -66,7 +67,10 @@ export class UsersService {
    * fornecer instâncias dos serviços necessários para o funcionamento do UsersService
    * [F4ETgg].
    */
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly menuService: MenuService,
+  ) {}
 
   /**
    * NOTE: Os métodos abaixo implementam operações CRUD (Create, Read, Update, Delete)
@@ -164,6 +168,50 @@ export class UsersService {
       });
     } catch (cause) {
       serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub: id });
+    }
+  }
+
+  // Usado pelo usuário final
+  async findProfile({ sub, roles }: { sub: string; roles: RoleTemplateName[] }): Promise<Partial<User> | null> {
+    try {
+      const menu = this.menuService.findAll(roles);
+      const profile = await this.prisma.user.findUnique({
+        where: { userName: sub, active: true },
+        select: {
+          userName: true,
+          firstName: true,
+          lastName: true,
+          roles: {
+            select: {
+              name: true,
+              complement: true,
+            },
+          },
+          contacts: {
+            select: {
+              type: true,
+              content: true,
+              complement: true,
+            },
+          },
+          addresses: {
+            select: {
+              street: true,
+              number: true,
+              neighborhood: true,
+              city: true,
+              state: true,
+              zipCode: true,
+              complement: true,
+            },
+          },
+        },
+      });
+      const fullProfile = { ...profile, menu };
+      return fullProfile;
+    } catch (cause) {
+      console.error(cause);
+      serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub });
     }
   }
 

@@ -1,0 +1,50 @@
+[
+  {
+    "label": "Dashboard",
+    "link": {
+      "href": "/dashboard",
+      "rel": "view-dashboard",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Clientes",
+    "link": {
+      "href": "/customers",
+      "rel": "manage-customers",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Montadoras",
+    "link": {
+      "href": "/manufacturers",
+      "rel": "manage-manufacturers",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Peças",
+    "link": {
+      "href": "/parts",
+      "rel": "manage-parts",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Fornecedores",
+    "link": {
+      "href": "/suppliers",
+      "rel": "manage-suppliers",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Serviços",
+    "link": {
+      "href": "/services",
+      "rel": "manage-services",
+      "method": "GET"
+    }
+  }
+]

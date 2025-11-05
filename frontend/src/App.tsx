@@ -12,7 +12,7 @@ function App() {
   
   return (
     <HashRouter>
-      <Container landing={location.hash === '#/' || location.hash === ''} />
+      <Container />
     </HashRouter>
   );
 }

@@ -1,0 +1,69 @@
+{
+  "title": "Formulário de Inserção de Fornecedores",
+  "action": {
+    "href": "/supplier",
+    "rel": "supplier",
+    "method": "POST"
+  },
+  "flex": [
+    {
+      "row-1": [
+        {
+          "col-1": [
+            {
+              "name": "companyName",
+              "type": "text",
+              "label": "Nome",
+              "placeHolder": "Insira o nome da empresa",
+              "limit": 100,
+              "required": true
+            }
+          ]
+        },
+        {
+          "col-2": [
+            {
+              "name": "document",
+              "type": "text",
+              "label": "Documento",
+              "placeHolder": "Insira o documento",
+              "number": true,
+              "limit": 14,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row-2": [
+        {
+          "col-1": [
+            {
+              "name": "complement",
+              "type": "text",
+              "label": "Complemento",
+              "placeHolder": "Insira o complemento",
+              "limit": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row-3": [
+        {
+          "col-1": [
+            {
+              "name": "submitSupplierBtn",
+              "type": "button",
+              "label": "Cadastrar Fornecedor",
+              "submit": true,
+              "centered": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

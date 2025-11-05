@@ -18,17 +18,18 @@ export class UsersController {
     return this.UsersService.findAll();
   }
 
+  @Get('profile')
+  @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER, RoleTemplateName.CUSTOMER)
+  async getProfile(@Request() req) {
+    const sub = req.user.userName;
+    const roles: RoleTemplateName[] = req.user.roles.map((role: { name: RoleTemplateName }) => role.name);
+    return this.UsersService.findProfile({ sub, roles });
+  }
+
   @Get(':id')
   @Roles(RoleTemplateName.ADMIN)
   async findOne(@Param('id') id: string) {
     return this.UsersService.findOne(id);
-  }
-
-  @Get('profile')
-  @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER, RoleTemplateName.CUSTOMER)
-  async getProfile(@Request() req) {
-    const userId = req.user.sub;
-    return this.UsersService.findOne(userId);
   }
 
   @Post()

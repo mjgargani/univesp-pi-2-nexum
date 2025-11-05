@@ -30,8 +30,11 @@ export class ApiService {
     }
   }
 
-  static async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint);
+  static async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'GET',
+    });
   }
 
   static async post<T>(endpoint: string, data: any): Promise<T> {
@@ -44,6 +47,13 @@ export class ApiService {
   static async put<T>(endpoint: string, data: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  static async patch<T>(endpoint: string, data: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }

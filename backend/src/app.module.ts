@@ -10,6 +10,8 @@ import { VehicleTemplatesModule } from './entities/vehicle-templates/vehicle-tem
 import { ServiceTemplatesModule } from './entities/service-templates/service-templates.module';
 import { OrdersModule } from './entities/orders/orders.module';
 import { AuthModule } from './auth/auth.module';
+import { PostsModule } from './entities/posts/posts.module';
+import { MenuModule } from './entities/menu/menu.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { AuthModule } from './auth/auth.module';
     ServiceTemplatesModule,
     OrdersModule,
     AuthModule,
+    PostsModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -13,8 +13,21 @@ export class ManufacturersService {
     try {
       return this.prisma.manufacturer.findMany({
         where: { active: true },
-        include: {
-          vehicles: true,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          vehicles: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
         },
       });
     } catch (cause) {
@@ -26,7 +39,22 @@ export class ManufacturersService {
     try {
       return this.prisma.manufacturer.findUnique({
         where: { id, active: true },
-        include: { vehicles: true },
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          name: true,
+          complement: true,
+          vehicles: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              complement: true,
+            },
+          },
+        },
       });
     } catch (cause) {
       serviceErrorHandler(cause, { entity: Entity.MANUFACTURER, method: Crud.READ, sub: id });
