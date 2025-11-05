@@ -11,8 +11,9 @@ import type { Theme } from "../../types";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 
-export default function Container({ className='', landing=true, manage=false }: { className?: string, landing?: boolean, manage?: boolean }) {
+export default function Container({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>('dark');
+  const [currentPage, setCurrentPage] = useState<string>(window.location.hash);
 
   const localStorage = useLocalStorage();
 
@@ -36,37 +37,32 @@ export default function Container({ className='', landing=true, manage=false }: 
       <div className="flex flex-row flex-wrap items-center container max-w-7xl mx-auto gap-4">
         <Logo className="flex lg:flex-1 sm:flex-5"/>
         <nav className="flex flex-row flex-grow lg:flex-4 sm:flex-1 flex-wrap justify-between items-center gap-2">
-        {landing ? (
           <>
+            <Link to="/" aria-label="Ver Página 'Início'">
+              <Button className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow">{currentPage === '#/' || currentPage === '' ? 'INÍCIO' : 'VOLTAR PARA INÍCIO'}</Button>
+            </Link>
             <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página Inicial">HOME</Button>
             <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Quem Somos'">QUEM SOMOS</Button>
             <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Serviços'">SERVIÇOS</Button>
             <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Contato'">CONTATO</Button>
-            <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow">{manage ? 'GERENCIAR' : 'LOGIN'}</Button>
-            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}>TEMA ({theme === "dark" ? "ESCURO" : "CLARO"})</Button>
+            <Link to="/login" aria-label="Fazer Login">
+              <Button className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow">LOGIN</Button>
+            </Link> 
+            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" onClick={
+              // https://developer.mozilla.org/pt-BR/docs/Web/Accessibility/Guides/Mobile_accessibility_checklist#:~:text=Cor%20*%20O%20constrate%20de%20cor%20DEVE,outros%20meios%20(textos%20sublinhados%20para%20links%2C%20etc.)
+              () => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}>TEMA ({theme === "dark" ? "ESCURO" : "CLARO"}
+            )</Button>
           </>
-        ) : (
-          <>
-            <Link to="/customers" aria-label="Ver Clientes">
-              <Button status="options">CLIENTES</Button>
-            </Link>
-            <Link to="/services" aria-label="Ver Serviços">
-              <Button status="options">SERVIÇOS</Button>
-            </Link>
-          </>)}
         </nav>
       </div>
     </header>
     <main className="flex-1 items-center container max-w-7xl mx-auto px-4">
-      {landing ? (
-        <Landing />
-      ) : (
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/customers" element={<CustomerList />} />
-          <Route path="/services" element={<ServiceList />} />
-        </Routes>
-      )}
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/customers" element={<CustomerList />} />
+        <Route path="/services" element={<ServiceList />} />
+      </Routes>
     </main>
     <footer className="bg-[var(--fg)] rounded-t-lg">
       <div className="flex flex-row flex-wrap items-center justify-center gap-4 container max-w-7xl mx-auto p-2">

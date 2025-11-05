@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Ordens de Serviço",
+    "link": {
+      "href": "/orders",
+      "rel": "my-orders",
+      "method": "GET"
+    }
+  },
+  {
+    "label": "Veículos",
+    "link": {
+      "href": "/vehicles",
+      "rel": "my-vehicles",
+      "method": "GET"
+    }
+  }
+]

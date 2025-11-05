@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// - [HjfHUG] {@link https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations}
+// NOTE: SIMPLIFICAÇÃO: Atualização considerando junções implícitas. A fim de otimizar o schema e evitar tabelas de junção explícitas desnecessárias.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Entidades centrais do sistema (Recebem o campo "active" para "soft delete")
+
+model User {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at") // Mapeia o campo createdAt para a coluna created_at
+  updatedAt   DateTime  @updatedAt @map("updated_at") // @updatedAt é a convenção do Prisma
+  userName    String    @unique @map("user_name") // Mapeia o campo userName para a coluna user_name
+  password    String
+  document    String    @unique
+  firstName   String    @map("first_name") // Mapeia o campo firstName para a coluna first_name
+  middleName  String?   @map("middle_name") // Mapeia o campo middleName para a coluna middle_name
+  lastName    String    @map("last_name") // Mapeia o campo lastName para a coluna last_name
+  birthDate   DateTime? @map("birth_date") // Mapeia o campo birthDate para a coluna birth_date
+  complement  String?
+
+  vehicles    UserVehicleTemplate[] // Relação 1:N com UserVehicleTemplate
+
+  roles       RoleTemplate[]        // Relação M:N com RoleTemplate
+  
+  contacts    Contact[]             // Relação M:N com Contact
+
+  addresses   Address[]             // Relação M:N com Address
+
+  @@map("users") // Mapeia este modelo para a tabela 'users'
+}
+
+model Supplier {
+  id            String    @id @default(uuid())
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  companyName   String    @unique @map("company_name")
+  document      String    @unique
+  complement    String?
+
+  contacts      Contact[]       // Relação M:N com Contact
+
+  addresses     Address[]       // Relação M:N com Address
+
+  parts         PartTemplate[]  // Relação M:N com PartTemplate
+
+  @@map("suppliers")
+}
+
+model Manufacturer {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  name        String    @unique
+  complement  String?
+
+  vehicles    VehicleTemplate[] // Relação 1:N com VehicleTemplate
+
+  @@map("manufacturers")
+}
+
+// Entidades complementares de entidades relacionadas a pessoas físicas e jurídicas
+
+// ContactType enum definition
+
+enum ContactType {
+  PHONE
+  MAIL
+  OTHER
+}
+
+model Contact {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  type        ContactType
+  content     String
+  complement  String? // Ex: "Trabalho", "Residencial", "Falar com <...>", etc.
+
+  users       User[] // Relação M:N com User
+
+  suppliers   Supplier[] // Relação M:N com Supplier
+
+  @@map("contacts")
+}
+
+model Address {
+  id           String    @id @default(uuid())
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  street       String
+  number       String
+  neighborhood String
+  city         String
+  state        String
+  country      String
+  zipCode      String    @map("zip_code")
+  complement   String?   // Ex: "Apto 101", "Casa", etc.
+
+  users        User[] // Relação M:N com User
+
+  suppliers    Supplier[] // Relação M:N com Supplier
+
+  @@map("addresses")
+}
+
+// 'Singleton' para controle do último número de ordem utilizado
+model OrderCounter {
+  id        Int @id @default(1)
+  lastOrder Int @default(1000) // Começa a contagem em 1000
+
+  @@map("order_counter")
+}
+
+model ServiceStep {
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  stepNumber          Int @map("step_number")
+  name                String
+  estimatedDuration   Int @map("estimated_duration") // em minutos
+  complement          String?
+
+  // Relação N:1 com ServiceTemplate
+  serviceTemplateId   String  @map("service_template_id")
+  serviceTemplate     ServiceTemplate   @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Chave primária composta
+  @@id([serviceTemplateId, stepNumber])
+  @@map("service_steps")
+}
+
+model OrderStatus {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  name        String
+  complement  String?
+
+  // Relação N:1 com Order
+  orderId     String  @map("order_id")
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("order_statuses")
+}
+
+// Entidades de referência (templates) do sistema, usados por outras entidades
+
+enum RoleTemplateName {
+  ADMIN
+  MANAGER
+  CUSTOMER
+}
+model RoleTemplate {
+  id    String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name  RoleTemplateName   @unique @default(CUSTOMER)
+  complement  String?
+  
+  users User[] // Relação M:N com User
+
+  @@map("role_templates")
+}
+
+model PartTemplate {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  name        String    @unique
+  value       Float
+  complement  String?
+
+  serviceTemplates PartTemplateServiceTemplate[] // Relação M:N com ServiceTemplate via tabela de junção
+
+  suppliers   Supplier[] // Relação M:N com Supplier
+
+  @@map("part_templates")
+}
+
+model ServiceTemplate {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  value       Float
+  name        String    @unique
+  complement  String?
+
+  steps       ServiceStep[]     // Relação 1:N com ServiceStep
+
+  partTemplates       PartTemplateServiceTemplate[]    // Relação M:N com PartTemplate via tabela de junção
+
+  orders      Order[]           // Relação M:N com Order
+
+  @@map("service_templates")
+}
+
+model VehicleTemplate {
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  name            String        @unique
+  complement      String?
+
+  users           UserVehicleTemplate[] // Relação 1:N com UserVehicleTemplate
+
+  // Relação N:1 com Manufacturer
+  manufacturerId  String?         @map("manufacturer_id")
+  manufacturer    Manufacturer?   @relation(fields: [manufacturerId], references: [id])
+  
+  @@map("vehicle_templates")
+}
+
+// Entidade principal da regra de negócio: Ordem de Serviço (também leva "active" para "soft delete")
+
+model Order {
+  id          String    @id @default(uuid())
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  number      Int       @unique
+  scheduled   DateTime
+  conclusion  DateTime?
+  budget      Float
+  value       Float
+  complement  String?
+
+  statuses        OrderStatus[]               // Relação 1:N com OrderStatus
+
+  services        ServiceTemplate[]           // Relação 1:N com ServiceTemplate
+
+  // Relação N:1 com a INSTÂNCIA do veículo do usuário
+  userVehicleTemplateId   String @map("user_vehicle_template_id")
+  userVehicleTemplate     UserVehicleTemplate @relation(fields: [userVehicleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("orders")
+}
+
+// Relacionamento explícito entre User e VehicleTemplate, representando os veículos dos usuários (com dados adicionais como ano e cor)
+// Também leva "active" para "soft delete" (pra preservar a informação histórica)
+
+model UserVehicleTemplate {
+  id         String   @id @default(uuid())
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  year       Int
+  color      String
+  complement String?
+
+  // Relação 1:N com User
+  userId    String  @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Relação 1:N com VehicleTemplate
+  vehicleTemplateId String  @map("vehicle_template_id")
+  vehicleTemplate   VehicleTemplate  @relation(fields: [vehicleTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  orders          Order[]       // Relação 1:N com Order (Uma instância de carro pode ter várias ordens)
+  @@map("users_vehicle_templates")
+}
+
+// Relacionamento explícito entre PartTemplate e ServiceTemplate (tabela de junção para relação M:N)
+
+model PartTemplateServiceTemplate {
+  complement        String?
+  
+  partTemplateId    String  @map("part_template_id")
+  partTemplate      PartTemplate    @relation(fields: [partTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  
+  serviceTemplateId String  @map("service_template_id")
+  serviceTemplate   ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+
+  @@id([partTemplateId, serviceTemplateId])
+  @@map("part_template_service_template")
+}
