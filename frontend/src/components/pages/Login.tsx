@@ -25,7 +25,7 @@ export default function Login() {
     const token = localStorage.getItem('access_token');
 
     if (token) {
-      ApiService.get('/users', {
+      ApiService.get('/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

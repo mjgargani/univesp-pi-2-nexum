@@ -1,0 +1,10 @@
+[
+  {
+    "label": "Usuários",
+    "link": {
+      "href": "/users",
+      "rel": "manage-users",
+      "method": "GET"
+    }
+  }
+]

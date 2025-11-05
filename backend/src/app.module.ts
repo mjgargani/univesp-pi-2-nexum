@@ -11,6 +11,7 @@ import { ServiceTemplatesModule } from './entities/service-templates/service-tem
 import { OrdersModule } from './entities/orders/orders.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './entities/posts/posts.module';
+import { MenuModule } from './entities/menu/menu.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PostsModule } from './entities/posts/posts.module';
     OrdersModule,
     AuthModule,
     PostsModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [AppService],
