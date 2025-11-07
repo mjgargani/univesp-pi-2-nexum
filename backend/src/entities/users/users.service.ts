@@ -453,6 +453,17 @@ export class UsersService {
             },
           ],
         },
+        {
+          order: 3,
+          tag: 'button',
+          className: 'mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600',
+          innerText: 'Editar Perfil',
+          onClick: () => {
+            // aqui é que entra o pulo do gato, e que eu não sei como fazer ainda
+            console.log('Editar perfil clicado!');
+            // Lembrando que isso deve ser sanitizado e tratado no front-end
+          },
+        },
       ];
     } catch (cause) {
       console.error(cause);
