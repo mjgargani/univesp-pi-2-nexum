@@ -46,9 +46,17 @@ export interface LoginResponse {
   access_token: string;
 }
 
-export interface UserViewResponse {
-  [key: string]: any;
-}
+export type UserViewNode = {
+  order: number;
+  tag: string;
+  className?: string;
+  __html?: string;
+  innerText?: string;
+  children?: UserViewNode[]; // A propriedade 'children' é um array de mais Nós
+  [key: string]: any; // Permite outras props (ex: 'href' para <a>, 'disabled' para <button>)
+};
+
+export type UserViewResponse = UserViewNode[];
 
 export type UserNavigationResponse = Array<{
   label: string;
@@ -68,8 +76,8 @@ export interface MainContextType {
   // Dados do usuário
   token: string | null;
   setToken: (value: string | null) => void;
-  userView: UserViewResponse | null;
-  setUserView: (value: UserViewResponse | null) => void;
+  userView: UserViewProps | null;
+  setUserView: (value: UserViewProps | null) => void;
   userNavigation: UserNavigationResponse | null;
   setUserNavigation: (value: UserNavigationResponse | null) => void;
   // Ações

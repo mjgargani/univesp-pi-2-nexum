@@ -9,6 +9,7 @@ import { RoleTemplateName } from '../../auth/roles.enum';
 import { serviceErrorHandler } from '../../utils/serviceErrors';
 import { Crud, Entity, Subject } from '../crud.enum';
 import { MenuService } from '../menu/menu.service';
+import { UserViewResponse } from '../hypermedia.types';
 
 /**
  * NOTE: Referências:
@@ -365,7 +366,7 @@ export class UsersService {
 
   // Usados pelo usuário final
 
-  async findProfile(userName: string): Promise<object | null> {
+  async findProfile(userName: string): Promise<UserViewResponse | null> {
     try {
       const profile = await this.prisma.user.findUnique({
         where: { userName, active: true },
@@ -408,13 +409,13 @@ export class UsersService {
           order: 1,
           tag: 'h1',
           className: 'font-extrabold text-3xl mb-4',
-          content: `Bem-vindo(a), ${profile.firstName} ${profile.lastName}!`,
+          innerText: `Bem-vindo(a), ${profile.firstName} ${profile.lastName}!`,
         },
         {
           order: 2,
           tag: 'ul',
           className: 'list-disc pl-5 m-4',
-          content: [
+          children: [
             {
               order: 1,
               tag: 'li',

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMainContext } from "../../hooks/useMainContext";
 import Button from "../atoms/Button";
-import { View } from "../molecules/View";
+import { RecursiveView } from "../molecules/View";
 
 export default function Management() {
   const { getNavigation, userNavigation, getUserView, userView, loading, token } = useMainContext();
@@ -27,7 +27,7 @@ export default function Management() {
           {userNavigation?.map((item, i) => (<Button key={i} className="w-full">{item.label}</Button>))}
         </div>
         <div className="bg-[var(--fg)] rounded-lg gap-8 p-4 flex-4">
-          {userView && <View data={userView} />}
+          {userView && <RecursiveView data={userView} />}
         </div>
       </div>
     )}

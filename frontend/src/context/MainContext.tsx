@@ -67,19 +67,26 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
 
   // Acessa uma userView específica
   const getUserView = useCallback(async (endPoint: string) => {
-    setLoading(true);
-    return ApiService.get(endPoint, {
+  if (!token) {
+    console.error('Tentando buscar view sem token. Abortando.');
+    return;
+  }
+  setLoading(true);
+  
+  try {
+    const response = await ApiService.get<UserViewResponse>(endPoint, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
-    }).then(response => {
-      setUserView(response);
-    }).catch(()=>{
-      console.error('Falha ao obter o perfil do usuário.');
-    }).finally(() => {
-      setLoading(false);
     });
-  }, [token]);
+    setUserView(response); 
+  } catch (error) {
+    console.error('Falha ao obter o perfil do usuário.', error);
+    setUserView(null);
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
 
   // Acessa o perfil
   const getNavigation = useCallback(async () => {
