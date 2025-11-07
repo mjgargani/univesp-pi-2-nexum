@@ -365,14 +365,17 @@ export class UsersService {
 
   // Usados pelo usuário final
 
-  async findProfile(userName: string): Promise<Partial<User> | null> {
+  async findProfile(userName: string): Promise<object | null> {
     try {
-      return await this.prisma.user.findUnique({
+      const profile = await this.prisma.user.findUnique({
         where: { userName, active: true },
         select: {
           userName: true,
           firstName: true,
+          middleName: true,
           lastName: true,
+          document: true,
+          birthDate: true,
           roles: {
             select: {
               name: true,
@@ -399,6 +402,57 @@ export class UsersService {
           },
         },
       });
+
+      return [
+        {
+          order: 1,
+          tag: 'h1',
+          className: 'font-extrabold text-3xl mb-4',
+          content: `Bem-vindo(a), ${profile.firstName} ${profile.lastName}!`,
+        },
+        {
+          order: 2,
+          tag: 'ul',
+          className: 'list-disc pl-5 m-4',
+          content: [
+            {
+              order: 1,
+              tag: 'li',
+              __html: `Nome de usuário: <b>${profile.userName}</b>`,
+            },
+            {
+              order: 2,
+              tag: 'li',
+              __html: `Nome completo: <b>${profile.firstName} ${profile.middleName} ${profile.lastName}</b>`,
+            },
+            {
+              order: 3,
+              tag: 'li',
+              __html: `Documento: <b>${profile.document.substring(0, 4)}********</b>`,
+            },
+            {
+              order: 4,
+              tag: 'li',
+              __html: `Data de nascimento: <b>${profile.birthDate.toISOString().substring(0, 10)}</b>`,
+            },
+            {
+              order: 5,
+              tag: 'li',
+              __html: `Papéis: <b>${profile.roles.map((role) => role.name).join(', ')}</b>`,
+            },
+            {
+              order: 6,
+              tag: 'li',
+              __html: `Contatos: <b>${profile.contacts.map((contact) => `${contact.type} - ${contact.content}`).join('; ')}</b>`,
+            },
+            {
+              order: 7,
+              tag: 'li',
+              __html: `Endereços: <b>${profile.addresses.map((address) => `${address.street}, ${address.number}, ${address.city} - ${address.state}`).join('; ')}</b>`,
+            },
+          ],
+        },
+      ];
     } catch (cause) {
       console.error(cause);
       serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub: userName });
