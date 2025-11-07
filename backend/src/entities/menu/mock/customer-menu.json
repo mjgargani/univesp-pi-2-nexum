@@ -3,7 +3,7 @@
     "label": "Ordens de Serviço",
     "link": {
       "href": "/orders",
-      "rel": "my-orders",
+      "rel": "manage-orders",
       "method": "GET"
     }
   },
@@ -11,7 +11,7 @@
     "label": "Veículos",
     "link": {
       "href": "/vehicles",
-      "rel": "my-vehicles",
+      "rel": "manage-vehicles",
       "method": "GET"
     }
   }

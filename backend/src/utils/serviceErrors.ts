@@ -1,28 +1,32 @@
 import {
   ConflictException,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '../../generated/client';
-import { Crud, Entity } from '../entities/crud.enum';
+import { Crud, Entity, Subject } from '../entities/crud.enum';
 import { PrismaErrorCodes } from '../prisma/errorCodes.enum';
 
 interface ErrorContext {
   entity: Entity;
   method: Crud;
-  sub?: string;
+  sub?: Subject | string;
   data?: any;
 }
 
 export const serviceErrorHandler = (cause: any, { entity, method, sub, data }: ErrorContext) => {
+  const header = `${method} ${entity} '${sub || Subject.UNDEFINED}':`;
+  new Logger('ServiceErrorHandler').error(header, cause);
+
   // Anexa informações adicionais ao erro original
   const errorData: ErrorContext = { entity, method, sub, data };
   cause.errorData = errorData;
 
   // Testa se o erro é de autorização
   if (cause instanceof UnauthorizedException) {
-    throw new UnauthorizedException(`${method} ${entity} '${sub}': Acesso não autorizado.`, { cause });
+    throw new UnauthorizedException(`${header}': Acesso não autorizado.`, { cause });
   }
 
   /**
@@ -35,13 +39,13 @@ export const serviceErrorHandler = (cause: any, { entity, method, sub, data }: E
   if (cause instanceof Prisma.PrismaClientKnownRequestError) {
     switch (cause.code) {
       case PrismaErrorCodes.UNIQUE_CONSTRAINT_FAILED:
-        throw new ConflictException(`${method} ${entity} '${sub}': Conflito de dados.`, { cause });
+        throw new ConflictException(`${header}': Conflito de dados.`, { cause });
       case PrismaErrorCodes.NOT_NULL_VIOLATION:
-        throw new ConflictException(`${method} ${entity} '${sub}': Dados obrigatórios não preenchidos.`, {
+        throw new ConflictException(`${header}': Dados obrigatórios não preenchidos.`, {
           cause,
         });
       case PrismaErrorCodes.RECORD_NOT_FOUND:
-        throw new NotFoundException(`${method} ${entity} '${sub}': Registro não encontrado.`, { cause });
+        throw new NotFoundException(`${header}': Registro não encontrado.`, { cause });
     }
   }
 
@@ -51,7 +55,7 @@ export const serviceErrorHandler = (cause: any, { entity, method, sub, data }: E
    * ocorreu durante o processamento da requisição. Cabendo ao desenvolvedor
    * investigar os logs e detalhes do erro para identificar a causa raiz do problema.
    */
-  throw new InternalServerErrorException(`${method} ${entity} '${sub}': Erro interno do servidor.`, {
+  throw new InternalServerErrorException(`${header}': Erro interno do servidor.`, {
     cause,
   });
 };

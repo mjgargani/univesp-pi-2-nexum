@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getKeyValue, setKeyValue } from '../helpers/keyValue';
 
 type Dict = Record<string, string>;
@@ -7,6 +7,8 @@ const readSnapshot = (): Dict => {
   if (typeof window === 'undefined') return {};
   const ls = window.localStorage;
   const out: Dict = {};
+
+  // O loop serve para garantir que todos os itens sejam lidos
   for (let i=0; i< ls.length; i++) {
     const k = ls.key(i)!;
     out[k] = ls.getItem(k) ?? '';
@@ -26,23 +28,31 @@ export function useLocalStorage() {
     return () => window.removeEventListener('storage', onStorage);
   }, [isBrowser]);
 
-  const setItem = (key:string, value: string) => {
+  const setItem = useCallback((key:string, value: string) => {
     if (!isBrowser) return;
     const newValue = setKeyValue(key, value);
     window.localStorage.setItem(key, newValue[key]);
     setState(readSnapshot());
-  }
+  }, [isBrowser]);
 
-  const getItem = (key: string, defaultValue: string | null = null) => {
+  const getItem = useCallback((key: string, defaultValue: string | null = null) => {
     if (key in state) return getKeyValue(key, state, defaultValue);
     return defaultValue;
-  }
+  }, [state]);
 
-  const clear = () => {
+  const removeItem = useCallback((key: string) => {
+    if (!isBrowser) return;
+    window.localStorage.removeItem(key);
+    setState(readSnapshot());
+  }, [isBrowser]);
+
+  const clear = useCallback(() => {
     if (!isBrowser) return;
     window.localStorage.clear();
     setState(readSnapshot());
-  }
+  }, [isBrowser]);  
 
-  return {setItem, getItem, clear} as const
+  return useMemo(() => ({
+    setItem, getItem, removeItem, clear
+  }), [setItem, getItem, removeItem, clear]);
 }

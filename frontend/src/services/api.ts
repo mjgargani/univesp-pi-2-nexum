@@ -2,7 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (
   import.meta.env.PROD ? '/api' : 'http://localhost:3001/api'
 );
 
-export class ApiService {
+class ApiService {
   private static async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -37,21 +37,21 @@ export class ApiService {
     });
   }
 
-  static async post<T>(endpoint: string, data: any): Promise<T> {
+  static async post<K,T>(endpoint: string, data: K): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  static async put<T>(endpoint: string, data: any): Promise<T> {
+  static async put<K,T>(endpoint: string, data: K): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  static async patch<T>(endpoint: string, data: any): Promise<T> {
+  static async patch<K,T>(endpoint: string, data: K): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -64,3 +64,5 @@ export class ApiService {
     });
   }
 }
+
+export { ApiService };

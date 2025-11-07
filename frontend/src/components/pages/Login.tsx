@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { ApiService } from "../../services/api";
 import Form from "../molecules/Form";
-import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { useNavigate } from "react-router-dom";
+import { useMainContext } from "../../hooks/useMainContext";
+import type { HypermediaForm } from "../../types";
 
 export default function Login() {
-  const [loginForm, setLoginForm] = useState<null | object>(null);
-  const [loginData, setLoginData] = useState<null | object>(null);
-  const [profileData, setProfileData] = useState<null | object>(null);
+  const [loginForm, setLoginForm] = useState<HypermediaForm | null>(null);
+  const [loginData, ] = useState<null | object>(null);
 
-  const localStorage = useLocalStorage();
+  const { login, token, loading } = useMainContext();
+
+  const navigate = useNavigate();
   
   useEffect(() => {
-    ApiService.get('/auth/form').then(data => {
+    ApiService.get<HypermediaForm>('/auth/form').then(data => {
       setLoginForm(data);
     }).catch(error => {
       console.error('Error fetching login form:', error);
@@ -19,37 +22,20 @@ export default function Login() {
   }, []);
 
   useEffect(() => {
-    if (loginData && 'access_token' in loginData) {
-      localStorage.setItem('access_token', (loginData as any).access_token);   
+    if(navigate && token) {
+      navigate('/management');
     }
-    const token = localStorage.getItem('access_token');
+  }, [token, navigate]);
 
-    if (token) {
-      ApiService.get('/users/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }).then(data => {
-        setProfileData(data);
-      }).catch(error => {
-        console.error('Error fetching profile data:', error);
-      });
-    }
-  }, [loginData, localStorage])
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    await ApiService.post('/auth/login', data).then(response => {
-      setLoginData(response);
-    }).catch(error => {
-      console.error('Error during login:', error);
-    });
+    await login({ userName: data.userName as string, password: data.password as string });
   }
 
 	return (<div>
-    {(loginForm && !loginData) && <Form formData={loginForm} onSubmit={handleSubmit}/>}
-    {(profileData) && <div className="text-[var(--text)]">{JSON.stringify(profileData)}</div>}
+    {(loginForm && !loginData && !loading) && <Form formData={loginForm} onSubmit={handleSubmit}/>}
   </div>);
 }

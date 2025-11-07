@@ -171,50 +171,6 @@ export class UsersService {
     }
   }
 
-  // Usado pelo usuário final
-  async findProfile({ sub, roles }: { sub: string; roles: RoleTemplateName[] }): Promise<Partial<User> | null> {
-    try {
-      const menu = this.menuService.findAll(roles);
-      const profile = await this.prisma.user.findUnique({
-        where: { userName: sub, active: true },
-        select: {
-          userName: true,
-          firstName: true,
-          lastName: true,
-          roles: {
-            select: {
-              name: true,
-              complement: true,
-            },
-          },
-          contacts: {
-            select: {
-              type: true,
-              content: true,
-              complement: true,
-            },
-          },
-          addresses: {
-            select: {
-              street: true,
-              number: true,
-              neighborhood: true,
-              city: true,
-              state: true,
-              zipCode: true,
-              complement: true,
-            },
-          },
-        },
-      });
-      const fullProfile = { ...profile, menu };
-      return fullProfile;
-    } catch (cause) {
-      console.error(cause);
-      serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub });
-    }
-  }
-
   // NOTE: Mesma coisa que a função findOne, mas buscando por userName específico
   // usado para validação de login e autenticação (token JWT [K4X3xI])
   async findOneByUser(userName: string): Promise<User | null> {
@@ -305,7 +261,7 @@ export class UsersService {
       serviceErrorHandler(cause, {
         entity: Entity.USER,
         method: Crud.CREATE,
-        sub: dto.userName || Subject.UNDEFINED,
+        sub: dto?.userName || Subject.UNDEFINED,
         data: dto,
       });
     }
@@ -404,6 +360,56 @@ export class UsersService {
       });
     } catch (cause) {
       serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.DELETE, sub: id });
+    }
+  }
+
+  // Usados pelo usuário final
+
+  async findProfile(userName: string): Promise<Partial<User> | null> {
+    try {
+      return await this.prisma.user.findUnique({
+        where: { userName, active: true },
+        select: {
+          userName: true,
+          firstName: true,
+          lastName: true,
+          roles: {
+            select: {
+              name: true,
+              complement: true,
+            },
+          },
+          contacts: {
+            select: {
+              type: true,
+              content: true,
+              complement: true,
+            },
+          },
+          addresses: {
+            select: {
+              street: true,
+              number: true,
+              neighborhood: true,
+              city: true,
+              state: true,
+              zipCode: true,
+              complement: true,
+            },
+          },
+        },
+      });
+    } catch (cause) {
+      console.error(cause);
+      serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub: userName });
+    }
+  }
+
+  async getMenu(roles: RoleTemplateName[]) {
+    try {
+      return this.menuService.findAll(roles);
+    } catch (cause) {
+      serviceErrorHandler(cause, { entity: Entity.USER, method: Crud.READ, sub: JSON.stringify(roles) });
     }
   }
 }

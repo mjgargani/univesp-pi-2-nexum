@@ -14,16 +14,22 @@ export class UsersController {
 
   @Get()
   @Roles(RoleTemplateName.ADMIN)
-  async findAll(@Request() req) {
+  async findAll() {
     return this.UsersService.findAll();
   }
 
   @Get('profile')
   @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER, RoleTemplateName.CUSTOMER)
   async getProfile(@Request() req) {
-    const sub = req.user.userName;
+    const userName = req.user.userName;
+    return this.UsersService.findProfile(userName);
+  }
+
+  @Get('menu')
+  @Roles(RoleTemplateName.ADMIN, RoleTemplateName.MANAGER, RoleTemplateName.CUSTOMER)
+  async getMenu(@Request() req) {
     const roles: RoleTemplateName[] = req.user.roles.map((role: { name: RoleTemplateName }) => role.name);
-    return this.UsersService.findProfile({ sub, roles });
+    return this.UsersService.getMenu(roles);
   }
 
   @Get(':id')

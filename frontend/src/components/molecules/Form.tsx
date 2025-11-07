@@ -107,13 +107,13 @@ export default function Form({ formData, onSubmit }: { formData: any, onSubmit: 
         <form action={formHeader.action?.href} method={formHeader.action?.method || "GET"} className="flex flex-col flex-grow w-full" onSubmit={onSubmit}>
           {formComposition.map((rowItem, i) => {
             return (
-              <div className="flex flex-wrap justify-center gap-4 w-full">
+              <div key={i} className="flex flex-wrap justify-center gap-4 w-full">
                 { 
-                  rowItem.row.map((colItem, i) => (
-                    <div key={i} className="flex flex-wrap flex-1 mb-4">
+                  rowItem.row.map((colItem, j) => (
+                    <div key={j} className="flex flex-wrap flex-1 mb-4">
                       {
-                        colItem.col.map((field: any, j: number) => (
-                          <div className="flex flex-grow">
+                        colItem.col.map((field: any, k: number) => (
+                          <div key={k} className="flex flex-grow">
                             { 
                               field.type === "button" ? (
                                 <button
