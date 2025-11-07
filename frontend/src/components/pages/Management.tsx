@@ -1,30 +1,37 @@
 import { useEffect } from "react";
 import { useMainContext } from "../../hooks/useMainContext";
+import Button from "../atoms/Button";
+import { View } from "../molecules/View";
 
 export default function Management() {
-  const { getUserMenu, userMenu, loading, token } = useMainContext();
+  const { getNavigation, userNavigation, getUserView, userView, loading, token } = useMainContext();
 
   useEffect(() => {
-    if(token &&!loading && !userMenu){
-      getUserMenu();
+    if(token &&!loading){
+      if(!userNavigation) {
+        getNavigation();
+      }
+      if(!userView) {
+        getUserView('/users/profile');
+      }
     }
-  }, [token, loading, userMenu, getUserMenu]);
+  }, [token, loading, userNavigation, getNavigation, userView, getUserView]);
 
   return (<>
     {loading && (
       <div>Carregando informações...</div>
     )}
-    {!loading && userMenu && (
+    {!loading && userNavigation && (
       <div className="container flex w-full flex-row flex-grow gap-8">
         <div className="bg-[var(--fg)] rounded-lg gap-8 p-4 flex-1">
-          {userMenu?.map((item, i) => (<p key={i}>{item.label}</p>))}
+          {userNavigation?.map((item, i) => (<Button key={i} className="w-full">{item.label}</Button>))}
         </div>
         <div className="bg-[var(--fg)] rounded-lg gap-8 p-4 flex-4">
-          <p>Forms</p>
+          {userView && <View data={userView} />}
         </div>
       </div>
     )}
-    {!loading && !userMenu && (
+    {!loading && !userNavigation && (
       <div>Não foi possível carregar o perfil.</div>
     )}
   </>);

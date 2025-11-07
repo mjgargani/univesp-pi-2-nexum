@@ -46,31 +46,11 @@ export interface LoginResponse {
   access_token: string;
 }
 
-export interface ProfileResponse {
-  userName: string;
-  firstName: string;
-  lastName: string;
-  roles: Array<{
-    name: string;
-    complement: string | null;
-  }>;
-  contacts: Array<{
-    type: string;
-    content: string;
-    complement: string | null;
-  }>;
-  addresses: Array<{
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    complement: string | null;
-  }>
+export interface UserViewResponse {
+  [key: string]: any;
 }
 
-export type MenuResponse = Array<{
+export type UserNavigationResponse = Array<{
   label: string;
   link: {
     href: string;
@@ -78,6 +58,7 @@ export type MenuResponse = Array<{
     method: string;
   };
 }>;
+
 export interface MainContextType {
   // Interface
   loading: boolean;
@@ -87,13 +68,13 @@ export interface MainContextType {
   // Dados do usuário
   token: string | null;
   setToken: (value: string | null) => void;
-  profile: ProfileResponse | null;
-  setProfile: (value: ProfileResponse | null) => void;
-  userMenu: MenuResponse | null;
-  setUserMenu: (value: MenuResponse | null) => void;
+  userView: UserViewResponse | null;
+  setUserView: (value: UserViewResponse | null) => void;
+  userNavigation: UserNavigationResponse | null;
+  setUserNavigation: (value: UserNavigationResponse | null) => void;
   // Ações
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
-  getProfile: () => Promise<void>;
-  getUserMenu: () => Promise<void>;
+  getUserView: (endPoint: string) => Promise<void>;
+  getNavigation: () => Promise<void>;
 }
