@@ -91,3 +91,18 @@ export interface MainContextType {
   setAlert: (value: AlertProps | null) => void;
   handleAlert: (newAlert: AlertProps | null) => void;
 }
+
+export type MainMenuItem = {
+  order: number;
+  title: string;
+  icon: string | {
+    name: string;
+    rotation: number;
+  };
+  link: string;
+  conditional: {
+    authenticated: boolean | null;
+  }
+}
+
+export type MainMenuType = MainMenuItem[];

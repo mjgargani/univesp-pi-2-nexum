@@ -4,7 +4,7 @@ type ButtonStatus = "default" | "options" | "disabled";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   status?: ButtonStatus;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode; 
   children: React.ReactNode;
 }
 
@@ -39,7 +39,9 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={isDisabled}
       {...props}
     >
-      {icon && <span className="mr-2 flex items-center">{icon}</span>}
+      {icon && (
+        <span className="w-4 h-4 mr-2 flex items-center">{icon}</span>
+      )}
       <span className="flex items-center">{children}</span>
     </button>
   );
