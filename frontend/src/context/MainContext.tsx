@@ -45,6 +45,7 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
 
   // Aciona alertas
   const handleAlert = useCallback((newAlert: AlertProps | null) => {
+    console.log({ newAlert });
     setAlert(newAlert);
     console[newAlert?.type || 'log'](newAlert?.message || '');
   }, []);
