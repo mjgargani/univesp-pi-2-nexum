@@ -1,21 +1,46 @@
 import React, { type JSX } from 'react';
-import type { UserViewResponse } from '../../types';
+import type { UserViewNode, UserViewResponse } from '../../types';
+import DOMPurify from 'dompurify';
 
 /**
  * Um componente recursivo que renderiza uma estrutura de 'Nós'
  * vinda da API.
  */
 export function RecursiveView({data}: {data: UserViewResponse}): JSX.Element {
-  const sortedData = React.useMemo(() => {
-    if (!data || !Array.isArray(data)) return [];
-    // Imutabiliza e ordena os dados pelo campo 'order'
-    return [...data].sort((a, b) => a.order - b.order);
+  // Ordenar e 'sanitizar' (Remover códigos maliciosos) os dados de entrada
+  // O hook useMemo evita reprocessar os dados se 'data' não mudar
+  const sortedAndSanitizedData = React.useMemo(() => {  
+    // Função recursiva
+    const processNodes = (nodes: UserViewNode[]): UserViewNode[] => {
+      if (!nodes || !Array.isArray(nodes)) return [];
+
+      return [...nodes] // Copia para não mutar
+        .sort((a, b) => a.order - b.order) // Ordena o nível atual
+        .map(node => {
+          // Copia o nó para não mutar o original
+          const newNode = { ...node };
+
+          // Sanitiza o __html (se existir)
+          if (newNode.__html) {
+            newNode.__html = DOMPurify.sanitize(newNode.__html);
+          }
+
+          // RECURSÃO: Se o nó tiver 'children', processe-os também
+          if (newNode.children) {
+            newNode.children = processNodes(newNode.children);
+          }
+          
+          return newNode;
+        });
+    };
+
+    return processNodes(data);
   }, [data]);
-  console.log({sortedData});
+
   // Mapeia os nós ordenados para elementos React
   return (
     <>
-      {sortedData.map((node) => {
+      {sortedAndSanitizedData.map((node) => {
         const {
           tag,
           className,

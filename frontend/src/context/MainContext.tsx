@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { type LoginRequest, type LoginResponse, type UserNavigationResponse, type UserViewResponse } from "../types";
+import { type AlertProps, type LoginRequest, type LoginResponse, type UserNavigationResponse, type UserViewResponse } from "../types";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ApiService } from "../services/api";
 import { MainContext } from "./contexts";
@@ -11,6 +11,7 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
   const [token, setToken] = useState<string | null>(null);
   const [userNavigation, setUserNavigation] = useState<UserNavigationResponse | null>(null);
   const [userView, setUserView] = useState<UserViewResponse | null>(null);
+  const [alert, setAlert] = useState<AlertProps | null>(null);
 
   const localStorage = useLocalStorage();
 
@@ -42,20 +43,11 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     setToken(localStorage.getItem('access_token'));
   }, [localStorage]);
 
-  // Acessa o perfil com as credenciais do usuário (userName e password)
-  const login = useCallback(async ({ userName, password }: LoginRequest) => {
-    setLoading(true);
-    return ApiService.post<LoginRequest, LoginResponse>('/auth/login', {
-        userName,
-        password
-    }).then(response => {
-      handleTokenChange(response.access_token);
-    }).catch(()=>{
-      console.error('Falha ao realizar login com as credenciais fornecidas.');
-    }).finally(() => {
-      setLoading(false);
-    });
-  }, [handleTokenChange]);
+  // Aciona alertas
+  const handleAlert = useCallback((newAlert: AlertProps | null) => {
+    setAlert(newAlert);
+    console[newAlert?.type || 'log'](newAlert?.message || '');
+  }, []);
 
   // Limpa as credenciais do usuário e o perfil
   const logout = useCallback(() => {
@@ -65,10 +57,31 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     setUserView(null);
   }, [localStorage]);
 
+  // Acessa o perfil com as credenciais do usuário (userName e password)
+  const login = useCallback(async ({ userName, password }: LoginRequest) => {
+    setLoading(true);
+    return ApiService.post<LoginRequest, LoginResponse>('/auth/login', {
+        userName,
+        password
+    }).then(response => {
+      handleTokenChange(response.access_token);
+    }).catch(()=>{
+      const newAlert: AlertProps = {
+        show: true,
+        type: 'error',
+        message: 'Falha ao realizar login com as credenciais fornecidas.'
+      };
+      handleAlert(newAlert);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, [handleTokenChange, handleAlert]);
+
   // Acessa uma userView específica
   const getUserView = useCallback(async (endPoint: string) => {
   if (!token) {
     console.error('Tentando buscar view sem token. Abortando.');
+    logout();
     return;
   }
   setLoading(true);
@@ -82,11 +95,11 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     setUserView(response); 
   } catch (error) {
     console.error('Falha ao obter o perfil do usuário.', error);
-    setUserView(null);
+    logout();
   } finally {
     setLoading(false);
   }
-}, [token]);
+}, [token, logout]);
 
   // Acessa o perfil
   const getNavigation = useCallback(async () => {
@@ -99,10 +112,11 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
       setUserNavigation(response);
     }).catch(()=>{
       console.error('Falha ao obter o menu do usuário.');
+      logout();
     }).finally(() => {
       setLoading(false);
     });
-  }, [token]);
+  }, [token, logout]);
 
   return <MainContext.Provider value={
     {
@@ -119,7 +133,10 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
       login,
       logout,
       getUserView,
-      getNavigation
+      getNavigation,
+      alert,
+      setAlert,
+      handleAlert
     }
   }>
     {children}

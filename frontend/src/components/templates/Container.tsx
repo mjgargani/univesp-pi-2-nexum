@@ -4,18 +4,30 @@ import Landing from "../pages/Landing";
 import Login from "../pages/Login";
 import Button from '../atoms/Button';
 import Logo from "../atoms/Logo";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Management from "../pages/Management";
 import { useMainContext } from "../../hooks/useMainContext";
 import Logout from "../pages/Logout";
+import { Alert } from "../atoms/Alert";
+import type { AlertProps } from "../../types";
 
 
 export default function Container({ className }: { className?: string }) {
   const [currentPage, ] = useState<string>(window.location.hash);
 
-  const { token, theme, handleThemeChange } = useMainContext();
+  const { token, theme, handleThemeChange, handleAlert } = useMainContext();
+
+  useEffect(() => {
+    const newAlert: AlertProps = {
+      show: true,
+      type: 'warn',
+      message: 'Esta é uma aplicação de demonstração desenvolvida para fins acadêmicos. Todos os dados apresentados são fictícios e não representam informações reais de usuários ou entidades.'
+    };
+    handleAlert(newAlert);
+  }, [handleAlert])
   
   return (<div className={`flex flex-col min-h-screen bg-[var(--bg)] gap-8 ${className}`}>
+    <Alert />
     <header className="bg-[var(--fg)] flex flex-row flex-wrap items-center rounded-b-lg w-full p-2">
       <div className="flex flex-row flex-wrap items-center container max-w-7xl mx-auto gap-4">
         <Logo className="flex lg:flex-1 sm:flex-5"/>

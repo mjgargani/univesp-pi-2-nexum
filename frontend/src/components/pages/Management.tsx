@@ -2,9 +2,13 @@ import { useEffect } from "react";
 import { useMainContext } from "../../hooks/useMainContext";
 import Button from "../atoms/Button";
 import { RecursiveView } from "../molecules/View";
+import { useNavigate } from "react-router-dom";
+import type { AlertProps } from "../../types";
 
 export default function Management() {
-  const { getNavigation, userNavigation, getUserView, userView, loading, token } = useMainContext();
+  const { getNavigation, userNavigation, getUserView, userView, loading, token, handleAlert } = useMainContext();
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     if(token &&!loading){
@@ -14,8 +18,16 @@ export default function Management() {
       if(!userView) {
         getUserView('/users/profile');
       }
+    } else if (!token){
+      const newAlert: AlertProps = {
+        show: true,
+        type: 'error',
+        message: 'Token de autenticação indisponível ou sessão expirada, realize o login novamente.'
+      };
+      handleAlert(newAlert);
+      navigate('/login');
     }
-  }, [token, loading, userNavigation, getNavigation, userView, getUserView]);
+  }, [token, loading, userNavigation, getNavigation, userView, getUserView, navigate, handleAlert]);
 
   return (<>
     {loading && (

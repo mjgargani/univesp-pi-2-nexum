@@ -67,6 +67,8 @@ export type UserNavigationResponse = Array<{
   };
 }>;
 
+export type AlertProps = { show: boolean; type: 'log' | 'warn' | 'error'; message: string }
+
 export interface MainContextType {
   // Interface
   loading: boolean;
@@ -76,8 +78,8 @@ export interface MainContextType {
   // Dados do usuário
   token: string | null;
   setToken: (value: string | null) => void;
-  userView: UserViewProps | null;
-  setUserView: (value: UserViewProps | null) => void;
+  userView: UserViewResponse | null;
+  setUserView: (value: UserViewResponse | null) => void;
   userNavigation: UserNavigationResponse | null;
   setUserNavigation: (value: UserNavigationResponse | null) => void;
   // Ações
@@ -85,4 +87,7 @@ export interface MainContextType {
   logout: () => void;
   getUserView: (endPoint: string) => Promise<void>;
   getNavigation: () => Promise<void>;
+  alert: AlertProps | null;
+  setAlert: (value: AlertProps | null) => void;
+  handleAlert: (newAlert: AlertProps | null) => void;
 }
