@@ -1,42 +1,35 @@
 
-import { Link, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Login from "../pages/Login";
-import Button from '../atoms/Button';
 import Logo from "../atoms/Logo";
-import { useState } from "react";
+import { useEffect } from "react";
 import Management from "../pages/Management";
 import { useMainContext } from "../../hooks/useMainContext";
 import Logout from "../pages/Logout";
+import { Alert } from "../atoms/Alert";
+import type { AlertProps } from "../../types";
+import { MainMenu } from "../molecules/MainMenu";
 
 
 export default function Container({ className }: { className?: string }) {
-  const [currentPage, ] = useState<string>(window.location.hash);
+  const { handleAlert } = useMainContext();
 
-  const { token, theme, handleThemeChange } = useMainContext();
+  useEffect(() => {
+    const newAlert: AlertProps = {
+      show: true,
+      type: 'warn',
+      message: 'Esta é uma aplicação de demonstração desenvolvida para fins acadêmicos. Todos os dados apresentados são fictícios e não representam informações reais de usuários ou entidades.'
+    };
+    handleAlert(newAlert);
+  }, [handleAlert])
   
   return (<div className={`flex flex-col min-h-screen bg-[var(--bg)] gap-8 ${className}`}>
+    <Alert />
     <header className="bg-[var(--fg)] flex flex-row flex-wrap items-center rounded-b-lg w-full p-2">
       <div className="flex flex-row flex-wrap items-center container max-w-7xl mx-auto gap-4">
-        <Logo className="flex lg:flex-1 sm:flex-5"/>
-        <nav className="flex flex-row flex-grow lg:flex-4 sm:flex-1 flex-wrap justify-between items-center gap-2">
-          <>
-            <Link to="/" aria-label="Ver Página 'Início'">
-              <Button className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow">{currentPage === '#/' || currentPage === '' ? 'INÍCIO' : 'VOLTAR PARA INÍCIO'}</Button>
-            </Link>
-            <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página Inicial">HOME</Button>
-            <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Quem Somos'">QUEM SOMOS</Button>
-            <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Serviços'">SERVIÇOS</Button>
-            <Button status="disabled" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" aria-label="Ver Página 'Contato'">CONTATO</Button>
-            <Link to={token ? '/logout' : '/login'} aria-label="Fazer Login">
-              <Button className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow">{token ? 'LOGOUT' : 'LOGIN'}</Button>
-            </Link> 
-            <Button status="options" className="bg-[var(--brand)] text-[var(--text)] font-bold px-6 py-2 rounded-lg text-lg tracking-wide hover:bg-[var(--highlight)] sm:flex-grow" onClick={
-              // https://developer.mozilla.org/pt-BR/docs/Web/Accessibility/Guides/Mobile_accessibility_checklist#:~:text=Cor%20*%20O%20constrate%20de%20cor%20DEVE,outros%20meios%20(textos%20sublinhados%20para%20links%2C%20etc.)
-              () => handleThemeChange()}>TEMA ({theme ? "ESCURO" : "CLARO"}
-            )</Button>
-          </>
-        </nav>
+        <Logo className="flex lg:flex-1 sm:flex-5" />
+        <MainMenu />
       </div>
     </header>
     <main className="flex-1 items-center container max-w-7xl mx-auto px-4">

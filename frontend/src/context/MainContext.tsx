@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { type LoginRequest, type LoginResponse, type MenuResponse, type ProfileResponse } from "../types";
+import { type AlertProps, type LoginRequest, type LoginResponse, type UserNavigationResponse, type UserViewResponse } from "../types";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ApiService } from "../services/api";
 import { MainContext } from "./contexts";
@@ -9,8 +9,9 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState<boolean>(false);
   const [theme, setTheme] = useState<boolean | null>(true);
   const [token, setToken] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileResponse | null>(null);
-  const [userMenu, setUserMenu] = useState<MenuResponse | null>(null);
+  const [userNavigation, setUserNavigation] = useState<UserNavigationResponse | null>(null);
+  const [userView, setUserView] = useState<UserViewResponse | null>(null);
+  const [alert, setAlert] = useState<AlertProps | null>(null);
 
   const localStorage = useLocalStorage();
 
@@ -23,10 +24,8 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme', null);
     const storedToken = localStorage.getItem('access_token', null);
-    const storedProfile = localStorage.getItem('profile', null);
     setTheme(storedTheme === 'dark');
     setToken(storedToken);
-    setProfile(storedProfile ? JSON.parse(storedProfile) : null);
   }, [localStorage]);
 
   const handleThemeChange = useCallback(() => {
@@ -44,6 +43,21 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     setToken(localStorage.getItem('access_token'));
   }, [localStorage]);
 
+  // Aciona alertas
+  const handleAlert = useCallback((newAlert: AlertProps | null) => {
+    console.log({ newAlert });
+    setAlert(newAlert);
+    console[newAlert?.type || 'log'](newAlert?.message || '');
+  }, []);
+
+  // Limpa as credenciais do usuário e o perfil
+  const logout = useCallback(() => {
+    localStorage.removeItem('access_token');
+    setToken(null);
+    setUserNavigation(null);
+    setUserView(null);
+  }, [localStorage]);
+
   // Acessa o perfil com as credenciais do usuário (userName e password)
   const login = useCallback(async ({ userName, password }: LoginRequest) => {
     setLoading(true);
@@ -53,51 +67,57 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     }).then(response => {
       handleTokenChange(response.access_token);
     }).catch(()=>{
-      console.error('Falha ao realizar login com as credenciais fornecidas.');
+      const newAlert: AlertProps = {
+        show: true,
+        type: 'error',
+        message: 'Falha ao realizar login com as credenciais fornecidas.'
+      };
+      handleAlert(newAlert);
     }).finally(() => {
       setLoading(false);
     });
-  }, [handleTokenChange]);
+  }, [handleTokenChange, handleAlert]);
 
-  // Limpa as credenciais do usuário e o perfil
-  const logout = useCallback(() => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('profile');
-    setToken(null);
-    setProfile(null);
-  }, [localStorage]);
+  // Acessa uma userView específica
+  const getUserView = useCallback(async (endPoint: string) => {
+  if (!token) {
+    console.error('Tentando buscar view sem token. Abortando.');
+    logout();
+    return;
+  }
+  setLoading(true);
+  
+  try {
+    const response = await ApiService.get<UserViewResponse>(endPoint, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    setUserView(response); 
+  } catch (error) {
+    console.error('Falha ao obter o perfil do usuário.', error);
+    logout();
+  } finally {
+    setLoading(false);
+  }
+}, [token, logout]);
 
   // Acessa o perfil
-  const getProfile = useCallback(async () => {
+  const getNavigation = useCallback(async () => {
     setLoading(true);
-    return ApiService.get<ProfileResponse>('/users/profile', {
+    return ApiService.get<UserNavigationResponse>('/users/menu', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     }).then(response => {
-      setProfile(response);
-    }).catch(()=>{
-      console.error('Falha ao obter o perfil do usuário.');
-    }).finally(() => {
-      setLoading(false);
-    });
-  }, [token]);
-
-  // Acessa o perfil
-  const getUserMenu = useCallback(async () => {
-    setLoading(true);
-    return ApiService.get<MenuResponse>('/users/menu', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    }).then(response => {
-      setUserMenu(response);
+      setUserNavigation(response);
     }).catch(()=>{
       console.error('Falha ao obter o menu do usuário.');
+      logout();
     }).finally(() => {
       setLoading(false);
     });
-  }, [token]);
+  }, [token, logout]);
 
   return <MainContext.Provider value={
     {
@@ -107,14 +127,17 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
       handleThemeChange,
       token,
       setToken,
-      profile,
-      setProfile,
-      userMenu,
-      setUserMenu,
+      userView,
+      setUserView,
+      userNavigation,
+      setUserNavigation,
       login,
       logout,
-      getProfile,
-      getUserMenu
+      getUserView,
+      getNavigation,
+      alert,
+      setAlert,
+      handleAlert
     }
   }>
     {children}

@@ -46,31 +46,19 @@ export interface LoginResponse {
   access_token: string;
 }
 
-export interface ProfileResponse {
-  userName: string;
-  firstName: string;
-  lastName: string;
-  roles: Array<{
-    name: string;
-    complement: string | null;
-  }>;
-  contacts: Array<{
-    type: string;
-    content: string;
-    complement: string | null;
-  }>;
-  addresses: Array<{
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    complement: string | null;
-  }>
-}
+export type UserViewNode = {
+  order: number;
+  tag: string;
+  className?: string;
+  __html?: string;
+  innerText?: string;
+  children?: UserViewNode[]; // A propriedade 'children' é um array de mais Nós
+  [key: string]: any; // Permite outras props (ex: 'href' para <a>, 'disabled' para <button>)
+};
 
-export type MenuResponse = Array<{
+export type UserViewResponse = UserViewNode[];
+
+export type UserNavigationResponse = Array<{
   label: string;
   link: {
     href: string;
@@ -78,6 +66,9 @@ export type MenuResponse = Array<{
     method: string;
   };
 }>;
+
+export type AlertProps = { show: boolean; type: 'log' | 'warn' | 'error'; message: string }
+
 export interface MainContextType {
   // Interface
   loading: boolean;
@@ -87,13 +78,31 @@ export interface MainContextType {
   // Dados do usuário
   token: string | null;
   setToken: (value: string | null) => void;
-  profile: ProfileResponse | null;
-  setProfile: (value: ProfileResponse | null) => void;
-  userMenu: MenuResponse | null;
-  setUserMenu: (value: MenuResponse | null) => void;
+  userView: UserViewResponse | null;
+  setUserView: (value: UserViewResponse | null) => void;
+  userNavigation: UserNavigationResponse | null;
+  setUserNavigation: (value: UserNavigationResponse | null) => void;
   // Ações
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
-  getProfile: () => Promise<void>;
-  getUserMenu: () => Promise<void>;
+  getUserView: (endPoint: string) => Promise<void>;
+  getNavigation: () => Promise<void>;
+  alert: AlertProps | null;
+  setAlert: (value: AlertProps | null) => void;
+  handleAlert: (newAlert: AlertProps | null) => void;
 }
+
+export type MainMenuItem = {
+  order: number;
+  title: string;
+  icon: string | {
+    name: string;
+    rotation: number;
+  };
+  link: string;
+  conditional: {
+    authenticated: boolean | null;
+  }
+}
+
+export type MainMenuType = MainMenuItem[];

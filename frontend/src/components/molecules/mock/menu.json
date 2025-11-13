@@ -1,0 +1,56 @@
+[
+  {
+    "order": 1,
+    "title": "Página Inicial",
+    "icon": "main-menu-home",
+    "link": "/"
+  },
+  {
+    "order": 2,
+    "title": "Quem Somos",
+    "icon": "main-menu-about",
+    "link": "/about"
+  },
+  {
+    "order": 3,
+    "title": "Serviços",
+    "icon": "main-menu-services",
+    "link": "/services"
+  },
+  {
+    "order": 4,
+    "title": "Contato",
+    "icon": "main-menu-contact",
+    "link": "/contact"
+  },
+  {
+    "order": 5,
+    "title": "Login",
+    "icon": "main-menu-login",
+    "link": "/login",
+    "conditional": {
+      "authenticated": false
+    }
+  },
+  {
+    "order": 6,
+    "title": "Gerenciar Conta",
+    "icon": "main-menu-management",
+    "link": "/management",
+    "conditional": {
+      "authenticated": true
+    }
+  },
+  {
+    "order": 7,
+    "title": "Logout",
+    "icon": {
+      "name": "main-menu-login",
+      "rotation": 180
+    },
+    "link": "/logout",
+    "conditional": {
+      "authenticated": true
+    }
+  }
+]
